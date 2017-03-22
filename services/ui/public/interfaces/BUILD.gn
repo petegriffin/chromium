@@ -16,6 +16,8 @@ mojom("interfaces") {
 
   sources = [
     # TODO: if adding a new mojom add it to interfaces_tmp below.
+    "external_window_tree_factory.mojom",
+    "external_window_tree_host_factory.mojom",
     "remote_event_dispatcher.mojom",
     "user_activity_monitor.mojom",
     "video_detector.mojom",
