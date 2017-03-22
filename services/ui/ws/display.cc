@@ -53,15 +53,27 @@ Display::~Display() {
     focus_controller_.reset();
   }
 
-  if (!binding_) {
-    for (auto& pair : window_manager_display_root_map_)
-      pair.second->window_manager_state()->OnDisplayDestroying(this);
-  } else if (!window_manager_display_root_map_.empty()) {
-    // If there is a |binding_| then the tree was created specifically for this
-    // display (which corresponds to a WindowTreeHost).
-    window_server_->DestroyTree(window_manager_display_root_map_.begin()
-                                    ->second->window_manager_state()
-                                    ->window_tree());
+  // Notify the window manager state that the display is being destroyed.
+  for (auto& pair : window_manager_display_root_map_)
+    pair.second->window_manager_state()->OnDisplayDestroying(this);
+
+  if (binding_ && !window_manager_display_root_map_.empty()) {
+    // If there is a |binding_| then the tree was created specifically for one
+    // or more displays, which correspond to WindowTreeHosts.
+    WindowManagerDisplayRoot* display_root =
+        window_manager_display_root_map_.begin()->second;
+    WindowTree* tree = display_root->window_manager_state()->window_tree();
+    ServerWindow* root = display_root->root();
+    if (tree) {
+      // Delete the window root corresponding to that display.
+      ClientWindowId root_id;
+      if (tree->IsWindowKnown(root, &root_id))
+        tree->DeleteWindow(root_id);
+
+      // Destroy the tree once all the roots have been removed.
+      if (tree->roots().empty())
+        window_server_->DestroyTree(tree);
+    }
   }
 }
 
@@ -209,7 +221,35 @@ void Display::SetTitle(const std::string& title) {
   platform_display_->SetTitle(base::UTF8ToUTF16(title));
 }
 
+void Display::InitDisplayRoot() {
+  DCHECK(window_server_->IsInExternalWindowMode());
+  DCHECK(binding_);
+
+  std::unique_ptr<WindowManagerDisplayRoot> display_root_ptr(
+      new WindowManagerDisplayRoot(this));
+  // TODO(tonikitoo): Code still has assumptions that even in external window
+  // mode make 'window_manager_display_root_map_' needed.
+  window_manager_display_root_map_[service_manager::mojom::kRootUserID] =
+      display_root_ptr.get();
+
+  WindowTree* window_tree = window_server_->GetTreeForExternalWindowMode();
+
+  std::unique_ptr<WindowManagerState> window_manager_state =
+      base::MakeUnique<WindowManagerState>(window_tree);
+  display_root_ptr->window_manager_state_ = window_manager_state.get();
+  window_tree->AddExternalModeWindowManagerState(
+      std::move(window_manager_state));
+
+  WindowManagerDisplayRoot* display_root = display_root_ptr.get();
+  display_root->window_manager_state_->AddWindowManagerDisplayRoot(
+      std::move(display_root_ptr));
+}
+
 void Display::InitWindowManagerDisplayRoots() {
+  // Tests can create ws::Display instances directly, by-passing
+  // WindowTreeHostFactory.
+  // TODO(tonikitoo): Check if with the introduction of 'external window mode'
+  // this path is still needed.
   if (binding_) {
     std::unique_ptr<WindowManagerDisplayRoot> display_root_ptr(
         new WindowManagerDisplayRoot(this));
@@ -290,7 +330,11 @@ EventSink* Display::GetEventSink() {
 
 void Display::OnAcceleratedWidgetAvailable() {
   display_manager()->OnDisplayAcceleratedWidgetAvailable(this);
-  InitWindowManagerDisplayRoots();
+
+  if (window_server_->IsInExternalWindowMode())
+    InitDisplayRoot();
+  else
+    InitWindowManagerDisplayRoots();
 }
 
 void Display::OnNativeCaptureLost() {
@@ -414,6 +458,12 @@ void Display::OnWindowManagerWindowTreeFactoryReady(
 }
 
 EventDispatchDetails Display::OnEventFromSource(Event* event) {
+  // TODO(tonikitoo): Current WindowManagerDisplayRoot class is misnamed, since
+  // in external window mode a non-WindowManager specific 'DisplayRoot' is also
+  // needed.
+  // Bits of WindowManagerState also should be factored out and made available
+  // in external window mode, so that event handling is functional.
+  // htts://crbug.com/701129
   WindowManagerDisplayRoot* display_root = GetActiveWindowManagerDisplayRoot();
   if (display_root) {
     WindowManagerState* wm_state = display_root->window_manager_state();

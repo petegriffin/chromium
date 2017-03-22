@@ -39,6 +39,7 @@ class DisplayBinding;
 class DisplayManager;
 class FocusController;
 class WindowManagerDisplayRoot;
+class WindowManagerState;
 class WindowServer;
 class WindowTree;
 
@@ -170,6 +171,10 @@ class Display : public PlatformDisplayDelegate,
 
   // Inits the necessary state once the display is ready.
   void InitWindowManagerDisplayRoots();
+
+  // Inits the display root once the display is ready in
+  // 'external window mode'.
+  void InitDisplayRoot();
 
   // Creates the set of WindowManagerDisplayRoots from the
   // WindowManagerWindowTreeFactorySet.
