@@ -322,9 +322,13 @@ bool WaylandWindow::CanDispatchEvent(const PlatformEvent& native_event) {
 uint32_t WaylandWindow::DispatchEvent(const PlatformEvent& native_event) {
   Event* event = static_cast<Event*>(native_event);
   if (event->IsLocatedEvent() && !has_pointer_focus_) {
-    ConvertEventLocationToTargetWindowLocation(
-        g_current_capture_->GetBounds().origin(), GetBounds().origin(),
-        event->AsLocatedEvent());
+    DCHECK(connection_);
+    WaylandWindow* window = connection_->GetCurrentFocusedWindow();
+    if (window) {
+      ConvertEventLocationToTargetWindowLocation(GetBounds().origin(),
+                                                 window->GetBounds().origin(),
+                                                 event->AsLocatedEvent());
+    }
   }
 
   DispatchEventFromNativeUiEvent(
