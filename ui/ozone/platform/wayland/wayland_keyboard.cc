@@ -71,14 +71,16 @@ void WaylandKeyboard::Enter(void* data,
                             uint32_t serial,
                             wl_surface* surface,
                             wl_array* keys) {
-  WaylandWindow::FromSurface(surface)->set_keyboard_focus(true);
+  if (surface)
+    WaylandWindow::FromSurface(surface)->set_keyboard_focus(true);
 }
 
 void WaylandKeyboard::Leave(void* data,
                             wl_keyboard* obj,
                             uint32_t serial,
                             wl_surface* surface) {
-  WaylandWindow::FromSurface(surface)->set_keyboard_focus(false);
+  if (surface)
+    WaylandWindow::FromSurface(surface)->set_keyboard_focus(false);
 }
 
 void WaylandKeyboard::Key(void* data,
