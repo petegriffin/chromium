@@ -85,7 +85,10 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
   bool CanDispatchEvent(const PlatformEvent& event) override;
   uint32_t DispatchEvent(const PlatformEvent& event) override;
 
-  void HandleSurfaceConfigure(int32_t widht, int32_t height);
+  void HandleSurfaceConfigure(int32_t widht,
+                              int32_t height,
+                              bool is_maximized,
+                              bool is_fullscreen);
 
   void OnCloseRequest();
 
@@ -104,6 +107,14 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
 
   // Tells if |this| has capture.
   bool HasCapture();
+
+  // TODO(msisov, tonikitoo): share this with X11WindowBase.
+  bool IsMinimized();
+  bool IsMaximized();
+  bool IsFullScreen();
+
+  // Resets the maximized and fullscreen window states.
+  void ResetWindowStates();
 
   PlatformWindowDelegate* delegate_;
   WaylandConnection* connection_;
@@ -127,6 +138,10 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
   gfx::Rect pending_bounds_;
   bool has_pointer_focus_ = false;
   bool has_keyboard_focus_ = false;
+
+  bool is_minimized_ = false;
+  bool is_maximized_ = false;
+  bool is_fullscreen_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(WaylandWindow);
 };
