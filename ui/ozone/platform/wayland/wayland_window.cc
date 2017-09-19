@@ -418,6 +418,11 @@ void WaylandWindow::HandleSurfaceConfigure(int32_t width,
 
   if (!IsFullscreen() && !IsMaximized())
     restored_bounds_ = gfx::Rect();
+
+  was_active_ = is_active_;
+  is_active_ = is_activated;
+  if (was_active_ != is_active_)
+    delegate_->OnActivationChanged(is_active_);
 }
 
 void WaylandWindow::OnCloseRequest() {
