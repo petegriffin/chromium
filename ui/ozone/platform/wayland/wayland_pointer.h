@@ -57,12 +57,18 @@ class WaylandPointer {
 
   void SetSerial(uint32_t serial);
 
+  int GetFlagsWithKeyboardModifiers();
+
   WaylandConnection* connection_ = nullptr;
   std::unique_ptr<WaylandCursor> cursor_;
   wl::Object<wl_pointer> obj_;
   EventDispatchCallback callback_;
   gfx::PointF location_;
   int flags_ = 0;
+
+  // Keeps track of current modifiers. These are needed in order to properly
+  // update |flags_| with newest modifiers.
+  int keyboard_modifiers_ = 0;
 };
 
 }  // namespace ui
