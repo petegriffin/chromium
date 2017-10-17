@@ -38,6 +38,7 @@ class AccessPolicy;
 class Display;
 class DisplayManager;
 class GpuHost;
+class PlatformDisplay;
 class ServerWindow;
 class ThreadedImageCursorsFactory;
 class UserActivityMonitor;
@@ -228,10 +229,11 @@ class WindowServer : public ServerWindowDelegate,
   // a [re]paint. This should only be called in a test configuration.
   void SetPaintCallback(const base::Callback<void(ServerWindow*)>& callback);
 
-  void StartMoveLoop(uint32_t change_id,
+  bool StartMoveLoop(uint32_t change_id,
                      ServerWindow* window,
                      WindowTree* initiator,
-                     const gfx::Rect& revert_bounds);
+                     const gfx::Rect& revert_bounds,
+                     const gfx::Vector2d& drag_offset);
   void EndMoveLoop();
   uint32_t GetCurrentMoveLoopChangeId();
   ServerWindow* GetCurrentMoveLoopWindow();
@@ -386,6 +388,8 @@ class WindowServer : public ServerWindowDelegate,
                              const UserId& active_id) override;
   void OnUserIdAdded(const UserId& id) override;
   void OnUserIdRemoved(const UserId& id) override;
+
+  PlatformDisplay* GetPlatformDisplayOfVisibleRoot(const ServerWindow* window);
 
   UserIdTracker user_id_tracker_;
 
