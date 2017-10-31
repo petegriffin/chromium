@@ -155,6 +155,10 @@ void X11WindowBase::Create() {
       window_type = gfx::GetAtom("_NET_WM_WINDOW_TYPE_MENU");
       swa.override_redirect = True;
       break;
+    case ui::PlatformWindowType::PLATFORM_WINDOW_TYPE_TOOLTIP:
+      window_type = gfx::GetAtom("_NET_WM_WINDOW_TYPE_TOOLTIP");
+      swa.override_redirect = True;
+      break;
     case ui::PlatformWindowType::PLATFORM_WINDOW_TYPE_POPUP:
       swa.override_redirect = True;
       window_type = gfx::GetAtom("_NET_WM_WINDOW_TYPE_NOTIFICATION");
@@ -180,6 +184,7 @@ void X11WindowBase::Create() {
   // Setup XInput event mask.
   long event_mask = ButtonPressMask | ButtonReleaseMask | FocusChangeMask |
                     KeyPressMask | KeyReleaseMask | ExposureMask |
+                    EnterWindowMask | LeaveWindowMask |
                     VisibilityChangeMask | StructureNotifyMask |
                     PropertyChangeMask | PointerMotionMask;
 
