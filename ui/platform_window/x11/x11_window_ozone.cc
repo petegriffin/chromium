@@ -97,6 +97,14 @@ void X11WindowOzone::StopMoveLoop() {
 #endif
 }
 
+void X11WindowOzone::CheckCanDispatchNextPlatformEvent(XEvent* xev) {
+  handle_next_event_ = xwindow() == None ? false : IsEventForXWindow(*xev);
+}
+
+void X11WindowOzone::PlatformEventDispatchFinished() {
+  handle_next_event_ = false;
+}
+
 bool X11WindowOzone::DispatchXEvent(XEvent* xev) {
   if (!IsEventForXWindow(*xev))
     return false;
@@ -106,28 +114,7 @@ bool X11WindowOzone::DispatchXEvent(XEvent* xev) {
 }
 
 bool X11WindowOzone::CanDispatchEvent(const PlatformEvent& platform_event) {
-  if (xwindow() == None)
-    return false;
-
-  // If there is a grab, capture events here.
-  X11WindowOzone* grabber = window_manager_->event_grabber();
-  if (grabber)
-    return grabber == this;
-
-  // TODO(kylechar): We may need to do something special for TouchEvents similar
-  // to how DrmWindowHost handles them.
-  auto* ewpe = static_cast<EventWithPlatformEvent*>(platform_event);
-  auto* xev = static_cast<XEvent*>(ewpe->platform_event);
-  DCHECK(xev);
-  if (!IsEventForXWindow(*xev))
-    return false;
-
-  Event* event = ewpe->event;
-  DCHECK(event);
-  if (event->IsLocatedEvent())
-    return GetBounds().Contains(event->AsLocatedEvent()->root_location());
-
-  return true;
+  return handle_next_event_;
 }
 
 uint32_t X11WindowOzone::DispatchEvent(const PlatformEvent& platform_event) {

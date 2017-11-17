@@ -35,6 +35,8 @@ class X11_WINDOW_EXPORT X11WindowOzone : public X11WindowBase,
   void StopMoveLoop() override;
 
   // XEventDispatcher:
+  void CheckCanDispatchNextPlatformEvent(XEvent* xev) override;
+  void PlatformEventDispatchFinished() override;
   bool DispatchXEvent(XEvent* event) override;
 
  private:
@@ -61,6 +63,11 @@ class X11_WINDOW_EXPORT X11WindowOzone : public X11WindowBase,
 #if !defined(OS_CHROMEOS)
   std::unique_ptr<WindowMoveLoopClient> move_loop_client_;
 #endif
+
+  // Tells if this dispatcher can process next translated event based on a
+  // previous check in ::CheckCanDispatchNextPlatformEvent based on a XID
+  // target.
+  bool handle_next_event_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(X11WindowOzone);
 };
