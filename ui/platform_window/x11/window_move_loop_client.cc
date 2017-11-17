@@ -20,8 +20,7 @@
 namespace ui {
 
 WindowMoveLoopClient::WindowMoveLoopClient()
-    : move_loop_(this), window_(nullptr) {
-}
+    : move_loop_(this), window_(nullptr) {}
 
 WindowMoveLoopClient::~WindowMoveLoopClient() {}
 

@@ -4,9 +4,9 @@
 
 #include "ui/platform_window/x11/whole_screen_move_loop.h"
 
-#include <stddef.h>
-#include <X11/keysym.h>
 #include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <stddef.h>
 #include <utility>
 
 #include "base/bind.h"
@@ -37,16 +37,14 @@
 namespace ui {
 
 // XGrabKey requires the modifier mask to explicitly be specified.
-const unsigned int kModifiersMasks[] = {
-  0,                                // No additional modifier.
-  Mod2Mask,                         // Num lock
-  LockMask,                         // Caps lock
-  Mod5Mask,                         // Scroll lock
-  Mod2Mask | LockMask,
-  Mod2Mask | Mod5Mask,
-  LockMask | Mod5Mask,
-  Mod2Mask | LockMask | Mod5Mask
-};
+const unsigned int kModifiersMasks[] = {0,         // No additional modifier.
+                                        Mod2Mask,  // Num lock
+                                        LockMask,  // Caps lock
+                                        Mod5Mask,  // Scroll lock
+                                        Mod2Mask | LockMask,
+                                        Mod2Mask | Mod5Mask,
+                                        LockMask | Mod5Mask,
+                                        Mod2Mask | LockMask | Mod5Mask};
 
 WholeScreenMoveLoop::WholeScreenMoveLoop(views::X11MoveLoopDelegate* delegate)
     : delegate_(delegate),
@@ -61,9 +59,9 @@ WholeScreenMoveLoop::~WholeScreenMoveLoop() {}
 void WholeScreenMoveLoop::DispatchMouseMovement() {
   if (!last_motion_in_screen_ && !last_motion_in_screen_->IsLocatedEvent())
     return;
-  delegate_->OnMouseMovement(last_motion_in_screen_->AsLocatedEvent()->location(),
-                             last_motion_in_screen_->flags(),
-                             last_motion_in_screen_->time_stamp());
+  delegate_->OnMouseMovement(
+      last_motion_in_screen_->AsLocatedEvent()->location(),
+      last_motion_in_screen_->flags(), last_motion_in_screen_->time_stamp());
   last_motion_in_screen_.reset();
 }
 

@@ -11,8 +11,8 @@
 #include "base/compiler_specific.h"
 #include "base/message_loop/message_loop.h"
 #include "ui/gfx/geometry/point.h"
-#include "ui/views/views_export.h"
 #include "ui/platform_window/x11/whole_screen_move_loop.h"
+#include "ui/views/views_export.h"
 #include "ui/wm/public/window_move_client.h"
 
 namespace ui {
@@ -32,7 +32,7 @@ class WindowMoveLoopClient : public views::X11MoveLoopDelegate {
   void OnMouseReleased() override;
   void OnMoveLoopEnded() override;
 
-  bool RunMoveLoop(PlatformWindow* window, const gfx::Vector2d& drag_offset);  
+  bool RunMoveLoop(PlatformWindow* window, const gfx::Vector2d& drag_offset);
   void EndMoveLoop();
 
   bool IsInMoveLoop();

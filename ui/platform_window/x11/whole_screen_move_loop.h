@@ -20,8 +20,6 @@
 #include "ui/views/widget/desktop_aura/x11_move_loop.h"
 #include "ui/views/widget/desktop_aura/x11_move_loop_delegate.h"
 
-
-
 namespace ui {
 class MouseEvent;
 class ScopedEventDispatcher;
