@@ -35,6 +35,8 @@ class WindowMoveLoopClient : public views::X11MoveLoopDelegate {
   bool RunMoveLoop(PlatformWindow* window, const gfx::Vector2d& drag_offset);  
   void EndMoveLoop();
 
+  bool IsInMoveLoop();
+
  private:
   WholeScreenMoveLoop move_loop_;
 

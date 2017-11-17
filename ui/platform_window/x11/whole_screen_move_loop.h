@@ -44,6 +44,8 @@ class WholeScreenMoveLoop : public ui::PlatformEventDispatcher {
   void UpdateCursor();
   void EndMoveLoop();
 
+  bool in_move_loop() { return in_move_loop_; }
+
  private:
   // Grabs the pointer, setting the mouse cursor to |cursor|. Returns true if
   // successful.

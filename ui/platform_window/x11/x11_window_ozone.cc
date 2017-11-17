@@ -102,7 +102,13 @@ bool X11WindowOzone::DispatchXEvent(XEvent* xev) {
 }
 
 bool X11WindowOzone::CanDispatchEvent(const PlatformEvent& platform_event) {
-  return handle_next_event_;
+  bool in_move_loop =
+#if !defined(OS_CHROMEOS)
+      move_loop_client_->IsInMoveLoop();
+#else
+      false;
+#endif
+  return handle_next_event_ || in_move_loop;
 }
 
 uint32_t X11WindowOzone::DispatchEvent(const PlatformEvent& platform_event) {

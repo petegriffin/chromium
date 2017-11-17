@@ -56,4 +56,8 @@ void WindowMoveLoopClient::EndMoveLoop() {
   move_loop_.EndMoveLoop();
 }
 
+bool WindowMoveLoopClient::IsInMoveLoop() {
+  return move_loop_.in_move_loop();
+}
+
 }  // namespace ui

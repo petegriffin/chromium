@@ -82,8 +82,7 @@ uint32_t WholeScreenMoveLoop::DispatchEvent(
   if (!in_move_loop_)
     return ui::POST_DISPATCH_PERFORM_DEFAULT;
 
-  auto* ewpe = static_cast<EventWithPlatformEvent*>(platform_event);
-  auto* event = static_cast<ui::Event*>(ewpe->event);
+  auto* event = static_cast<ui::Event*>(platform_event);
   switch (event->type()) {
     case ui::ET_MOUSE_MOVED:
     case ui::ET_MOUSE_DRAGGED: {
