@@ -15,6 +15,7 @@
 namespace ui {
 
 class X11WindowManagerOzone;
+class LocatedEvent;
 
 // PlatformWindow implementation for X11 Ozone. PlatformEvents are ui::Events.
 class X11_WINDOW_EXPORT X11WindowOzone : public X11WindowBase,
@@ -50,8 +51,9 @@ class X11_WINDOW_EXPORT X11WindowOzone : public X11WindowBase,
   // but capture is set to another foreground window.
   // TODO(msisov, tonikitoo): share this logic with DesktopWindowTreeHostX11
   // and WaylandWindow.
-  void ConvertEventLocationToCurrentWindowLocation(const XID& target,
-                                                   ui::Event* event);
+  void ConvertEventLocationToCurrentWindowLocation(
+      X11WindowOzone* target,
+      ui::LocatedEvent* located_event);
 
   // PlatformEventDispatcher:
   bool CanDispatchEvent(const PlatformEvent& event) override;

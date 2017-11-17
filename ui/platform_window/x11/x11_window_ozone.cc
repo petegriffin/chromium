@@ -17,18 +17,6 @@
 
 namespace ui {
 
-namespace {
-
-XID GetEventXWindow(EventWithPlatformEvent* ewpe) {
-  auto* xev = static_cast<XEvent*>(ewpe->platform_event);
-  XID target = xev->xany.window;
-  if (xev->type == GenericEvent)
-    target = static_cast<XIDeviceEvent*>(xev->xcookie.data)->event;
-  return target;
-}
-
-}  // namespace
-
 X11WindowOzone::X11WindowOzone(X11WindowManagerOzone* window_manager,
                                PlatformWindowDelegate* delegate,
                                const gfx::Rect& bounds)
@@ -118,29 +106,30 @@ bool X11WindowOzone::CanDispatchEvent(const PlatformEvent& platform_event) {
 }
 
 uint32_t X11WindowOzone::DispatchEvent(const PlatformEvent& platform_event) {
-  // This is unfortunately needed otherwise events that depend on global state
-  // (eg. double click) are broken.
-  auto* ewpe = static_cast<EventWithPlatformEvent*>(platform_event);
-  auto* event = static_cast<ui::Event*>(ewpe->event);
+  auto* event = static_cast<Event*>(platform_event);
+  if (!window_manager_->event_grabber() ||
+      window_manager_->event_grabber() == this) {
+    if (event->IsMouseEvent() && event->AsMouseEvent()->IsLeftMouseButton()) {
+      // Set location of an x root window, which will be used for interactive
+      // dragging/resize if a later hittest is positive.
+      SetXRootWindowEventLocation(event->AsMouseEvent()->root_location());
+    }
 
-  XID target = GetEventXWindow(ewpe);
-
-  // If the event came originally from another native window (was rerouted by
-  // PlatformEventSource), its location must be adapted using current window
-  // location.
-  if (target != xwindow())
-    ConvertEventLocationToCurrentWindowLocation(target, event);
-
-  if (event->IsMouseEvent() && event->AsMouseEvent()->IsLeftMouseButton()) {
-    // Set location of an x root window, which will be used for interactive
-    // dragging/resize if a later hittest is positive.
-    SetXRootWindowEventLocation(event->AsMouseEvent()->root_location());
+    // This is unfortunately needed otherwise events that depend on global state
+    // (eg. double click) are broken.
+    DispatchEventFromNativeUiEvent(
+        event, base::Bind(&PlatformWindowDelegate::DispatchEvent,
+                          base::Unretained(delegate())));
+    return POST_DISPATCH_STOP_PROPAGATION;
+  } else {
+    if (event->IsLocatedEvent()) {
+      // Another X11WindowOzone has installed itself as capture. Translate the
+      // event's location and dispatch to the other.
+      ConvertEventLocationToCurrentWindowLocation(
+          window_manager_->event_grabber(), event->AsLocatedEvent());
+    }
+    return window_manager_->event_grabber()->DispatchEvent(event);
   }
-
-  DispatchEventFromNativeUiEvent(
-      event, base::Bind(&PlatformWindowDelegate::DispatchEvent,
-                        base::Unretained(delegate())));
-  return POST_DISPATCH_STOP_PROPAGATION;
 }
 
 void X11WindowOzone::OnLostCapture() {
@@ -149,18 +138,14 @@ void X11WindowOzone::OnLostCapture() {
 }
 
 void X11WindowOzone::ConvertEventLocationToCurrentWindowLocation(
-    const XID& target,
-    ui::Event* event) {
-  X11WindowOzone* x11_window = window_manager_->GetX11WindowByTarget(target);
-  if (x11_window && x11_window != this && event->IsLocatedEvent()) {
-    gfx::Vector2d offset =
-        x11_window->GetBounds().origin() - GetBounds().origin();
-    ui::LocatedEvent* located_event = event->AsLocatedEvent();
-    gfx::PointF location_in_pixel_in_host =
-        located_event->location_f() + gfx::Vector2dF(offset);
-    located_event->set_location_f(location_in_pixel_in_host);
-    located_event->set_root_location_f(location_in_pixel_in_host);
-  }
+    X11WindowOzone* target,
+    ui::LocatedEvent* located_event) {
+  DCHECK_NE(this, target);
+  gfx::Vector2d offset = GetBounds().origin() - target->GetBounds().origin();
+  gfx::PointF location_in_pixel_in_host =
+      located_event->location_f() + gfx::Vector2dF(offset);
+  located_event->set_location_f(location_in_pixel_in_host);
+  located_event->set_root_location_f(location_in_pixel_in_host);
 }
 
 }  // namespace ui
