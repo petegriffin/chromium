@@ -19,7 +19,7 @@ class XDGPopupWrapperV5 : public XDGPopupWrapper {
 
   bool Initialize(WaylandConnection* connection,
                   wl_surface* surface,
-                  wl_surface* parent_surface,
+                  WaylandWindow* parent_window,
                   const gfx::Rect& bounds) override;
 
   // xdg_popup_listener

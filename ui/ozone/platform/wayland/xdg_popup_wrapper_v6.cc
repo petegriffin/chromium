@@ -21,11 +21,11 @@ XDGPopupWrapperV6::XDGPopupWrapperV6(std::unique_ptr<XDGSurfaceWrapper> surface,
 
 XDGPopupWrapperV6::~XDGPopupWrapperV6() {}
 
-// TODO(msisov): pass parent window here.
 bool XDGPopupWrapperV6::Initialize(WaylandConnection* connection,
                                    wl_surface* surface,
-                                   wl_surface* parent_surface,
+                                   WaylandWindow* parent_window,
                                    const gfx::Rect& bounds) {
+  DCHECK(connection && surface && parent_window);
   static const struct zxdg_popup_v6_listener zxdg_popup_v6_listener = {
       &XDGPopupWrapperV6::Configure, &XDGPopupWrapperV6::PopupDone,
   };
@@ -34,9 +34,6 @@ bool XDGPopupWrapperV6::Initialize(WaylandConnection* connection,
       static_cast<XDGSurfaceWrapperV6*>(zxdg_surface_v6_.get());
   if (!xdg_surface)
     return false;
-
-  WaylandWindow* parent_window = WaylandWindow::FromSurface(parent_surface);
-  DCHECK(parent_window);
 
   XDGSurfaceWrapperV6* parent_xdg_surface;
   // If the parent window is a popup, the surface of that popup must be used as

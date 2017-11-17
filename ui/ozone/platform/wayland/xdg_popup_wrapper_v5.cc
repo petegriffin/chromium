@@ -22,17 +22,17 @@ XDGPopupWrapperV5::~XDGPopupWrapperV5() {
 
 bool XDGPopupWrapperV5::Initialize(WaylandConnection* connection,
                                    wl_surface* surface,
-                                   wl_surface* parent_surface,
+                                   WaylandWindow* parent_window,
                                    const gfx::Rect& bounds) {
-  DCHECK(connection && surface && parent_surface);
+  DCHECK(connection && surface && parent_window);
   static const xdg_popup_listener xdg_popup_listener = {
       &XDGPopupWrapperV5::PopupDone,
   };
 
   surface_ = surface;
   xdg_popup_.reset(xdg_shell_get_xdg_popup(
-      connection->shell(), surface, parent_surface, connection->seat(),
-      connection->serial(), bounds.x(), bounds.y()));
+      connection->shell(), surface, parent_window->surface(),
+      connection->seat(), connection->serial(), bounds.x(), bounds.y()));
 
   xdg_popup_add_listener(xdg_popup_.get(), &xdg_popup_listener, this);
 

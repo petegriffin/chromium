@@ -11,6 +11,7 @@
 namespace ui {
 
 class WaylandConnection;
+class WaylandWindow;
 
 // A wrapper around different versions of xdg popups.
 class XDGPopupWrapper {
@@ -20,7 +21,7 @@ class XDGPopupWrapper {
   // Creates actual xdg popup object and sets a listener to it.
   virtual bool Initialize(WaylandConnection* connection,
                           wl_surface* surface,
-                          wl_surface* parent_surface,
+                          WaylandWindow* parent_window,
                           const gfx::Rect& bounds) = 0;
 };
 

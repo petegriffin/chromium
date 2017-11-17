@@ -22,7 +22,7 @@ class XDGPopupWrapperV6 : public XDGPopupWrapper {
   // XDGPopupWrapper:
   bool Initialize(WaylandConnection* connection,
                   wl_surface* surface,
-                  wl_surface* parent_surface,
+                  WaylandWindow* parent_window,
                   const gfx::Rect& bounds) override;
 
   zxdg_positioner_v6* CreatePositioner(WaylandConnection* connection,
