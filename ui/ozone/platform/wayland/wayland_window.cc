@@ -373,6 +373,8 @@ PlatformImeController* WaylandWindow::GetPlatformImeController() {
 }
 
 void WaylandWindow::PerformNativeWindowDragOrResize(uint32_t hittest) {
+  connection_->ResetPointerFlags();
+
   if (hittest == HTCAPTION)
     xdg_surface_->SurfaceMove(connection_);
   else
