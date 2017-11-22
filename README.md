@@ -46,6 +46,9 @@ ninja -C out/Ozone chrome
 
 Note that GN defaults to debug builds, which naturally take longer to finish and produce slower binaries at runtime. The 'is_debug=false' GN arguments disables it.
 
+Also note that some touch oriented Web pages like Google Maps, work better when the Touch Event API is explicitly enabled
+in chrome://flags or a command line argument --touch-events=enabled is passed.
+
 It is also possible to enable proprietary codecs (so that mp4, h264 medias play) with the following GN args: 'proprietary_codecs=true ffmpeg_branding=\"Chrome\"'.
 ```
 
