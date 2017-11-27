@@ -7,9 +7,10 @@
 
 #include "base/macros.h"
 #include "ui/platform_window/x11/x11_window_export.h"
-#include "ui/platform_window/x11/x11_window_ozone.h"
 
 namespace ui {
+
+class X11WindowOzone;
 
 class X11_WINDOW_EXPORT X11WindowManagerOzone {
  public:
@@ -26,19 +27,8 @@ class X11_WINDOW_EXPORT X11WindowManagerOzone {
   // Gets the current X11WindowOzone recipient of mouse events.
   X11WindowOzone* event_grabber() const { return event_grabber_; }
 
-  // Stores raw pointers to X11WindowOzone.
-  void AddX11Window(X11WindowOzone* window);
-
-  // Removes raw pointers to X11WindowOzone.
-  void DeleteX11Window(X11WindowOzone* window);
-
-  // Returns pointer to X11WindowOzone found by XID.
-  X11WindowOzone* GetX11WindowByTarget(const XID& xwindow);
-
  private:
   X11WindowOzone* event_grabber_;
-
-  std::vector<X11WindowOzone*> x11_windows_;
 
   DISALLOW_COPY_AND_ASSIGN(X11WindowManagerOzone);
 };
