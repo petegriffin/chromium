@@ -5,10 +5,10 @@
 #include "ui/platform_window/x11/x11_window_ozone.h"
 
 #include <X11/Xlib.h>
-#include <X11/extensions/XInput2.h>
 
 #include "base/bind.h"
 #include "ui/events/event.h"
+#include "ui/events/event_utils.h"
 #include "ui/events/ozone/events_ozone.h"
 #include "ui/events/platform/x11/x11_event_source.h"
 #include "ui/gfx/geometry/point.h"
@@ -22,8 +22,6 @@ X11WindowOzone::X11WindowOzone(X11WindowManagerOzone* window_manager,
                                const gfx::Rect& bounds)
     : X11WindowBase(delegate, bounds), window_manager_(window_manager) {
   DCHECK(window_manager);
-  window_manager_->AddX11Window(this);
-
   auto* event_source = X11EventSourceLibevent::GetInstance();
   if (event_source) {
     event_source->AddPlatformEventDispatcher(this);
@@ -41,9 +39,6 @@ X11WindowOzone::~X11WindowOzone() {
 }
 
 void X11WindowOzone::PrepareForShutdown() {
-  DCHECK(window_manager_);
-  window_manager_->DeleteX11Window(this);
-
   auto* event_source = X11EventSourceLibevent::GetInstance();
   if (event_source) {
     event_source->RemovePlatformEventDispatcher(this);
@@ -131,8 +126,9 @@ uint32_t X11WindowOzone::DispatchEvent(const PlatformEvent& platform_event) {
     if (event->IsLocatedEvent()) {
       // Another X11WindowOzone has installed itself as capture. Translate the
       // event's location and dispatch to the other.
-      ConvertEventLocationToCurrentWindowLocation(
-          window_manager_->event_grabber(), event->AsLocatedEvent());
+      ConvertEventLocationToTargetWindowLocation(
+          window_manager_->event_grabber()->GetBounds().origin(),
+          GetBounds().origin(), event->AsLocatedEvent());
     }
     return window_manager_->event_grabber()->DispatchEvent(event);
   }
@@ -141,17 +137,6 @@ uint32_t X11WindowOzone::DispatchEvent(const PlatformEvent& platform_event) {
 void X11WindowOzone::OnLostCapture() {
   ReleasePointerGrab();
   delegate()->OnLostCapture();
-}
-
-void X11WindowOzone::ConvertEventLocationToCurrentWindowLocation(
-    X11WindowOzone* target,
-    ui::LocatedEvent* located_event) {
-  DCHECK_NE(this, target);
-  gfx::Vector2d offset = GetBounds().origin() - target->GetBounds().origin();
-  gfx::PointF location_in_pixel_in_host =
-      located_event->location_f() + gfx::Vector2dF(offset);
-  located_event->set_location_f(location_in_pixel_in_host);
-  located_event->set_root_location_f(location_in_pixel_in_host);
 }
 
 }  // namespace ui
