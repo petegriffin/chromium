@@ -46,11 +46,11 @@ class XDGShellObjectFactory {
       std::unique_ptr<XDGSurfaceWrapper> surface =
           CreateXDGSurface(connection, wayland_window);
       surface->Initialize(connection, wayland_window->surface(), false);
-      return base::MakeUnique<XDGPopupWrapperV6>(std::move(surface),
+      return std::make_unique<XDGPopupWrapperV6>(std::move(surface),
                                                  wayland_window);
     }
     DCHECK(connection->shell());
-    return base::MakeUnique<XDGPopupWrapperV5>(wayland_window);
+    return std::make_unique<XDGPopupWrapperV5>(wayland_window);
   }
 
  private:
