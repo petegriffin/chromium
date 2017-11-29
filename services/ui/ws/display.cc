@@ -265,8 +265,13 @@ void Display::InitDisplayRoot() {
 
   std::unique_ptr<WindowManagerDisplayRoot> display_root_ptr(
       new WindowManagerDisplayRoot(this));
-  // TODO(tonikitoo): Code still has assumptions that even in external window
-  // mode make 'window_manager_display_root_map_' needed.
+  WindowManagerDisplayRoot* display_root = display_root_ptr.get();
+  // TODO(tonikitoo,msisov): Current WindowManagerDisplayRoot class is misnamed,
+  // since in external window mode a non-WindowManager specific 'DisplayRoot'
+  // is also needed.
+  // Bits of WindowManagerState also should be factored out and made available
+  // in external window mode, so that event handling is functional.
+  // htts://crbug.com/701129
   window_manager_display_root_map_[service_manager::mojom::kRootUserID] =
       display_root_ptr.get();
 
@@ -278,7 +283,6 @@ void Display::InitDisplayRoot() {
   window_tree->AddExternalModeWindowManagerState(
       std::move(window_manager_state));
 
-  WindowManagerDisplayRoot* display_root = display_root_ptr.get();
   display_root->window_manager_state_->AddWindowManagerDisplayRoot(
       std::move(display_root_ptr));
 }
@@ -552,12 +556,6 @@ void Display::OnWindowManagerWindowTreeFactoryReady(
 }
 
 EventDispatchDetails Display::OnEventFromSource(Event* event) {
-  // TODO(tonikitoo): Current WindowManagerDisplayRoot class is misnamed, since
-  // in external window mode a non-WindowManager specific 'DisplayRoot' is also
-  // needed.
-  // Bits of WindowManagerState also should be factored out and made available
-  // in external window mode, so that event handling is functional.
-  // htts://crbug.com/701129
   WindowManagerDisplayRoot* display_root = GetActiveWindowManagerDisplayRoot();
   if (display_root) {
     WindowManagerState* wm_state = display_root->window_manager_state();

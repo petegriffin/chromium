@@ -739,7 +739,7 @@ class WindowTreeClientTest : public WindowServerServiceTestBase {
     wt_client1_ = std::make_unique<TestWindowTreeClient>();
     wt_client1_->Bind(MakeRequest(&tree_client_ptr));
 
-    tree_factory->Register(MakeRequest(&tree), std::move(tree_client_ptr));
+    tree_factory->Create(MakeRequest(&tree), std::move(tree_client_ptr));
 
     ui::mojom::ExternalWindowTreeHostFactoryAssociatedPtr tree_host_factory;
     ui::mojom::ExternalWindowTreeHostFactory* tree_host_factory_ptr = nullptr;
