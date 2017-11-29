@@ -21,8 +21,8 @@ class ExternalWindowTreeFactory : public mojom::ExternalWindowTreeFactory {
   const UserId& user_id() const { return user_id_; }
 
  private:
-  void Register(mojom::WindowTreeRequest tree_request,
-                mojom::WindowTreeClientPtr tree_client) override;
+  void Create(mojom::WindowTreeRequest tree_request,
+              mojom::WindowTreeClientPtr tree_client) override;
 
   WindowServer* window_server_;
   const UserId user_id_;

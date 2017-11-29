@@ -11,12 +11,11 @@ import "services/ui/public/interfaces/window_tree.mojom";
 // Callers obtain a mojo handle to the unique ws::WindowTree instance,
 // on the server-side.
 //
-// NOTE: ExternalWindowTreeHostFactory::Register and
+// NOTE: ExternalWindowTreeFactory::Create and
 // ExternalWindowTreeHostFactory::CreatePlatformWindow are put on separate interfaces,
 // so that the interface containing ::CreatePlatformWindow is obtained by
 // calling ::Register. That eliminates the possibility of ::CreatePlatformWindow
 // being called before ::Register.
 interface ExternalWindowTreeFactory {
-   Register(WindowTree& tree_request,
-            WindowTreeClient client);
+   Create(WindowTree& tree_request, WindowTreeClient client);
 };

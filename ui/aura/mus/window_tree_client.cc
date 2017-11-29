@@ -296,7 +296,7 @@ void WindowTreeClient::ConnectViaExternalWindowTreeFactory() {
 
   ui::mojom::WindowTreeClientPtr client;
   binding_.Bind(MakeRequest(&client));
-  factory->Register(MakeRequest(&window_tree), std::move(client));
+  factory->Create(MakeRequest(&window_tree), std::move(client));
 
   in_external_window_mode_ = true;
 

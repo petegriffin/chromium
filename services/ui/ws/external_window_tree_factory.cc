@@ -17,7 +17,7 @@ ExternalWindowTreeFactory::ExternalWindowTreeFactory(
 
 ExternalWindowTreeFactory::~ExternalWindowTreeFactory() {}
 
-void ExternalWindowTreeFactory::Register(
+void ExternalWindowTreeFactory::Create(
     mojom::WindowTreeRequest tree_request,
     mojom::WindowTreeClientPtr tree_client) {
   // TODO(tonikitoo,msisov): Propose removing the bulk of "window manager"
