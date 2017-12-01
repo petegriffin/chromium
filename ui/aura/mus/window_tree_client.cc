@@ -826,6 +826,27 @@ void WindowTreeClient::OnWindowMusCreated(WindowMus* window) {
   window->set_server_id(next_window_id_++);
   RegisterWindowMus(window);
 
+  if (in_external_window_mode_ &&
+      window->window_mus_type() == WindowMusType::DISPLAY_MANUALLY_CREATED) {
+    WindowTreeHostMus* window_tree_host = GetWindowTreeHostMus(window);
+
+	// Provide initial properties to the server side mojom::WindowTreeHost
+    // (aka ws::Display), including bounds, window type, parent relationship.
+    const std::map<std::string, std::vector<uint8_t>> properties =
+        window_tree_host->mus_init_properties();
+
+    std::unordered_map<std::string, std::vector<uint8_t>> transport_properties;
+    for (const auto& property_pair : properties)
+      transport_properties[property_pair.first] = property_pair.second;
+
+    // Triggers the creation of a mojom::WindowTreeHost instance on the server
+    // side. Ends up calling back to client side, WindowTreeClient::OnEmbed.
+    ui::mojom::WindowTreeHostPtr host;
+    window_tree_host_factory_ptr_->CreatePlatformWindow(
+        MakeRequest(&host), window->server_id(), transport_properties);
+    return;
+  }
+
   DCHECK(window_manager_delegate_ || !IsRoot(window));
 
   std::unordered_map<std::string, std::vector<uint8_t>> transport_properties;
@@ -2408,6 +2429,9 @@ std::unique_ptr<WindowPortMus> WindowTreeClient::CreateWindowPortForTopLevel(
       std::make_unique<WindowPortMus>(this, window_type);
   roots_.insert(window_port.get());
 
+  if (in_external_window_mode_)
+    return window_port;
+
   window_port->set_server_id(next_window_id_++);
   RegisterWindowMus(window_port.get());
 
@@ -2417,20 +2441,11 @@ std::unique_ptr<WindowPortMus> WindowTreeClient::CreateWindowPortForTopLevel(
       transport_properties[property_pair.first] = property_pair.second;
   }
 
-  if (in_external_window_mode_) {
-    // Triggers the creation of a mojom::WindowTreeHost (aka ws::Display)
-    // instance on the server side.
-    // Ends up calling back to client side, aura::WindowTreeClient::OnEmbed.
-    ui::mojom::WindowTreeHostPtr host;
-    window_tree_host_factory_ptr_->CreatePlatformWindow(
-        MakeRequest(&host), window_port->server_id(), transport_properties);
-  } else {
-    const uint32_t change_id =
-        ScheduleInFlightChange(std::make_unique<CrashInFlightChange>(
-            window_port.get(), ChangeType::NEW_TOP_LEVEL_WINDOW));
-    tree_->NewTopLevelWindow(change_id, window_port->server_id(),
-                             transport_properties);
-  }
+  const uint32_t change_id =
+      ScheduleInFlightChange(std::make_unique<CrashInFlightChange>(
+          window_port.get(), ChangeType::NEW_TOP_LEVEL_WINDOW));
+  tree_->NewTopLevelWindow(change_id, window_port->server_id(),
+                           transport_properties);
 
   return window_port;
 }
