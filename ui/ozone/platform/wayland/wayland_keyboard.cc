@@ -81,7 +81,10 @@ void WaylandKeyboard::Leave(void* data,
   if (surface)
     WaylandWindow::FromSurface(surface)->set_keyboard_focus(false);
 
+  // Stop auto repeat once keyboard looses focus. Otherwise, KeyboardEvdev
+  // may continue auto repeating despite lost focus.
   WaylandKeyboard* keyboard = static_cast<WaylandKeyboard*>(data);
+  keyboard->evdev_keyboard_.StopKeyRepeat();
 
   // Reset all modifiers once focus is lost. Otherwise, the modifiers may be
   // left with old flags, which are no longer valid.
