@@ -61,6 +61,8 @@ class EVENTS_OZONE_EVDEV_EXPORT KeyboardEvdev {
   // Handle keyboard layout changes.
   bool SetCurrentLayoutByName(const std::string& layout_name);
 
+  void StopKeyRepeat();
+
  private:
   void UpdateModifier(int modifier_flag, bool down);
   void RefreshModifiers();
@@ -70,7 +72,6 @@ class EVENTS_OZONE_EVDEV_EXPORT KeyboardEvdev {
                        bool suppress_auto_repeat,
                        int device_id);
   void StartKeyRepeat(unsigned int key, int device_id);
-  void StopKeyRepeat();
   void ScheduleKeyRepeat(const base::TimeDelta& delay);
   void OnRepeatTimeout(unsigned int sequence);
   void OnRepeatCommit(unsigned int sequence);
