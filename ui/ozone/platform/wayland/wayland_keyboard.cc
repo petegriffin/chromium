@@ -24,15 +24,13 @@
 
 namespace ui {
 
-namespace {
-
-const int kXkbKeycodeOffset = 8;
-
-}  // namespace
-
 WaylandKeyboard::WaylandKeyboard(wl_keyboard* keyboard,
                                  const EventDispatchCallback& callback)
-    : obj_(keyboard), callback_(callback) {
+    : obj_(keyboard),
+      callback_(callback),
+      evdev_keyboard_(&modifiers_,
+                      KeyboardLayoutEngineManager::GetKeyboardLayoutEngine(),
+                      callback_) {
   static const wl_keyboard_listener listener = {
       &WaylandKeyboard::Keymap,    &WaylandKeyboard::Enter,
       &WaylandKeyboard::Leave,     &WaylandKeyboard::Key,
@@ -93,25 +91,9 @@ void WaylandKeyboard::Key(void* data,
   WaylandKeyboard* keyboard = static_cast<WaylandKeyboard*>(data);
   keyboard->connection_->set_serial(serial);
 
-  DomCode dom_code =
-      KeycodeConverter::NativeKeycodeToDomCode(key + kXkbKeycodeOffset);
-  if (dom_code == ui::DomCode::NONE)
-    return;
-
-  uint8_t flags = keyboard->modifiers_;
-  DomKey dom_key;
-  KeyboardCode key_code;
-  if (!KeyboardLayoutEngineManager::GetKeyboardLayoutEngine()->Lookup(
-          dom_code, flags, &dom_key, &key_code))
-    return;
-
-  // TODO(tonikitoo): handle repeat here.
-  bool down = state == WL_KEYBOARD_KEY_STATE_PRESSED;
-  ui::KeyEvent event(down ? ET_KEY_PRESSED : ET_KEY_RELEASED, key_code,
-                     dom_code, keyboard->modifiers_, dom_key,
-                     EventTimeForNow());
-  event.set_source_device_id(keyboard->obj_.id());
-  keyboard->callback_.Run(&event);
+  keyboard->evdev_keyboard_.OnKeyChange(
+      key, state == WL_KEYBOARD_KEY_STATE_PRESSED, false, EventTimeForNow(),
+      keyboard->obj_.id());
 }
 
 void WaylandKeyboard::Modifiers(void* data,
@@ -121,23 +103,14 @@ void WaylandKeyboard::Modifiers(void* data,
                                 uint32_t mods_latched,
                                 uint32_t mods_locked,
                                 uint32_t group) {
-#if BUILDFLAG(USE_XKBCOMMON)
-  WaylandKeyboard* keyboard = static_cast<WaylandKeyboard*>(data);
-  auto* engine = static_cast<WaylandXkbKeyboardLayoutEngine*>(
-      KeyboardLayoutEngineManager::GetKeyboardLayoutEngine());
-
-  keyboard->modifiers_ =
-      engine->UpdateModifiers(mods_depressed, mods_latched, mods_locked, group);
-
-#endif
+  // KeyboardEvDev handles modifiers.
 }
 
 void WaylandKeyboard::RepeatInfo(void* data,
                                  wl_keyboard* obj,
                                  int32_t rate,
                                  int32_t delay) {
-  // TODO(tonikitoo): Implement proper repeat handling.
-  NOTIMPLEMENTED();
+  // KeyboardEvDev handles key repeat.
 }
 
 }  // namespace ui
