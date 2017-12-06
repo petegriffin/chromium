@@ -217,7 +217,9 @@ void KeyboardEvdev::OnRepeatCommit(unsigned int sequence) {
   DispatchKey(repeat_key_, true /* down */, true /* repeat */,
               EventTimeForNow(), repeat_device_id_);
 
-  ScheduleKeyRepeat(repeat_interval_);
+  // Do not schedule auto repeat if it has been turned out.
+  if (IsAutoRepeatEnabled())
+    ScheduleKeyRepeat(repeat_interval_);
 }
 
 void KeyboardEvdev::DispatchKey(unsigned int key,

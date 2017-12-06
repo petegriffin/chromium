@@ -80,6 +80,15 @@ void WaylandKeyboard::Leave(void* data,
                             wl_surface* surface) {
   if (surface)
     WaylandWindow::FromSurface(surface)->set_keyboard_focus(false);
+
+  // Stop auto repeat once keyboard looses focus. Otherwise, KeyboardEvdev
+  // may continue auto repeating despite lost focus.
+  WaylandKeyboard* keyboard = static_cast<WaylandKeyboard*>(data);
+  keyboard->evdev_keyboard_.StopKeyRepeat();
+
+  // Reset all modifiers once focus is lost. Otherwise, the modifiers may be
+  // left with old flags, which are no longer valid.
+  keyboard->modifiers_.ResetKeyboardModifiers();
 }
 
 void WaylandKeyboard::Key(void* data,
@@ -110,7 +119,13 @@ void WaylandKeyboard::RepeatInfo(void* data,
                                  wl_keyboard* obj,
                                  int32_t rate,
                                  int32_t delay) {
-  // KeyboardEvDev handles key repeat.
+  WaylandKeyboard* keyboard = static_cast<WaylandKeyboard*>(data);
+  keyboard->evdev_keyboard_.SetAutoRepeatRate(
+      base::TimeDelta::FromMilliseconds(delay),
+      base::TimeDelta::FromMilliseconds(rate));
+
+  // Keyboard rate less than 0 means, wayland wants to disable autorepeat.
+  keyboard->evdev_keyboard_.SetAutoRepeatEnabled(rate > 0 ? true : false);
 }
 
 }  // namespace ui
