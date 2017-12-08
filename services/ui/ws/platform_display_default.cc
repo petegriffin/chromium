@@ -128,6 +128,9 @@ void PlatformDisplayDefault::SetWindowVisibility(bool visible) {
 }
 
 void PlatformDisplayDefault::SetNativeWindowState(ui::mojom::ShowState state) {
+  if (applying_window_state_changes_)
+    return;
+
   switch (state) {
     case (ui::mojom::ShowState::MINIMIZED):
       platform_window_->ReleaseCapture();
@@ -303,6 +306,11 @@ void PlatformDisplayDefault::OnWindowStateChanged(
       // We don't support other states at the moment. Ignore them.
       return;
   }
+
+  // OnWindowStateChanged() calls ServerWindow::SetProperty, which also calls to
+  // PlatformDisplayDefault::SetNativeWindowState. This value ensures where are
+  // not setting states of Ozone Windows twice.
+  base::AutoReset<bool> ignore_ws_state(&applying_window_state_changes_, true);
   delegate_->OnWindowStateChanged(state);
 }
 

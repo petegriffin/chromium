@@ -94,14 +94,11 @@ class X11_WINDOW_EXPORT X11WindowBase : public PlatformWindow {
   // The bounds of |xwindow_|.
   gfx::Rect bounds_;
 
-  // The bounds of our window before we were maximized.
-  gfx::Rect restored_bounds_in_pixels_;
 
   // The window manager state bits.
   std::set<::Atom> window_properties_;
 
   bool window_mapped_ = false;
-  bool is_fullscreen_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(X11WindowBase);
 };

@@ -130,6 +130,7 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
 
   gfx::Rect bounds_;
   gfx::Rect pending_bounds_;
+  gfx::Rect restored_bounds_;
   bool has_pointer_focus_ = false;
   bool has_keyboard_focus_ = false;
 
