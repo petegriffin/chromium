@@ -257,28 +257,28 @@ void X11WindowBase::SetCapture() {}
 void X11WindowBase::ReleaseCapture() {}
 
 void X11WindowBase::ToggleFullscreen() {
-  SetWMSpecState(!is_fullscreen_, gfx::GetAtom("_NET_WM_STATE_FULLSCREEN"),
+  DCHECK(!IsMinimized());
+  SetWMSpecState(!IsFullScreen(), gfx::GetAtom("_NET_WM_STATE_FULLSCREEN"),
                  x11::None);
-  is_fullscreen_ = !is_fullscreen_;
 }
 
 void X11WindowBase::Maximize() {
-  // Unfullscreen the window if it is fullscreen.
+  // X11 may end up in a situation, when the window is maximized and in a
+  // fullscreen mode at the same time. If that happens, the X11WindowBase has
+  // two states at the same time. Thus, when the window is maximized again after
+  // fullscreen, DCHECK ensures there is maximized state. Otherwise, just check
+  // if the state is not maximized.
+  DCHECK(IsFullScreen() || !IsMaximized());
+
   if (IsFullScreen())
     ToggleFullscreen();
-
-  // When we are in the process of requesting to maximize a window, we can
-  // accurately keep track of our restored bounds instead of relying on the
-  // heuristics that are in the PropertyNotify and ConfigureNotify handlers.
-  restored_bounds_in_pixels_ = bounds_;
 
   SetWMSpecState(true, gfx::GetAtom("_NET_WM_STATE_MAXIMIZED_VERT"),
                  gfx::GetAtom("_NET_WM_STATE_MAXIMIZED_HORZ"));
 }
 
 void X11WindowBase::Minimize() {
-  if (IsMinimized())
-    return;
+  DCHECK(!IsMinimized());
   XIconifyWindow(xdisplay_, xwindow_, 0);
 }
 
@@ -402,17 +402,16 @@ void X11WindowBase::OnWMStateUpdated() {
   // Propagate the window minimization information to the client.
   ui::PlatformWindowState state =
       ui::PlatformWindowState::PLATFORM_WINDOW_STATE_NORMAL;
-  if (IsMinimized() != was_minimized) {
-    if (IsMinimized()) {
-      state = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
-    } else if (IsMaximized()) {
-      // When the window is recovered from minimized state, set state to the
-      // previous maximized state if it was like that. Otherwise, NORMAL state
-      // will be set.
-      state = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
-    }
+  if (IsMaximized())
+    state = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
+  else if (IsFullScreen())
+    state = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_FULLSCREEN;
+  else if (IsMinimized())
+    state = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
+
+  // Do not flood the WindowServer unless the previous state was minimized.
+  if (was_minimized)
     delegate_->OnWindowStateChanged(state);
-  }
 }
 
 bool X11WindowBase::HasWMSpecProperty(const char* property) const {
@@ -430,7 +429,7 @@ bool X11WindowBase::IsMaximized() const {
 }
 
 bool X11WindowBase::IsFullScreen() const {
-  return is_fullscreen_;
+  return (HasWMSpecProperty("_NET_WM_STATE_FULLSCREEN"));
 }
 
 }  // namespace ui
