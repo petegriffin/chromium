@@ -86,6 +86,10 @@ class PlatformDisplayDefault : public PlatformDisplay,
   std::unique_ptr<ui::PlatformWindow> platform_window_;
   gfx::AcceleratedWidget widget_;
 
+  // Set to true once ozone is in a process of telling a server window of
+  // changed window state.
+  bool applying_window_state_changes_ = false;
+
   DISALLOW_COPY_AND_ASSIGN(PlatformDisplayDefault);
 };
 
