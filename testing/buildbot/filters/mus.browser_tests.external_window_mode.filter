@@ -1,14 +1,15 @@
-// Tests that fail on as well as on stock Chromium
+# Tests that fail on as well as on stock Chromium
 -LocalNTPVoiceJavascriptTest.TextTests 
 -TimeFormatBrowserTest.DecimalPointNotDot
 -PluginPowerSaverBrowserTest.PosterTests 
 -PluginPowerSaverBrowserTest.SmallerThanPlayIcon 
 -PluginPowerSaverBrowserTest.SmallCrossOrigin 
-// Thease might require to setup suid sandbox.
+
+# These might require to setup suid sandbox.
 -SandboxStatusUITest.testBPFSandboxEnabled 
 -SandboxStatusUITest.testSUIDorNamespaceSandboxEnabled 
 
-
+# These fail only with Linux/Mus.
 -PreviewsNoScriptBrowserTest.NoScriptPreviewsEnabled
 -PreviewsNoScriptBrowserTest.NoScriptPreviewsEnabledHttpRedirectToHttps
 -PreviewsOptimizationGuideBrowserTest.NoScriptPreviewsEnabledByWhitelist
