@@ -108,7 +108,6 @@
 -SnapshotBrowserTest.AsyncMultiWindowTest
 -SnapshotBrowserTest.SingleWindowTest
 -SnapshotBrowserTest.SyncMultiWindowTest
--WebContentsViewAuraTest.ReplaceStateReloadPushState
 -WebRtcCaptureFromElementBrowserTest.CaptureFromCanvas2DHandlesContextLoss
 -WebRtcCaptureFromElementBrowserTest.CaptureFromOpaqueCanvas2DHandlesContextLoss
 
