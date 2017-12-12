@@ -4,6 +4,8 @@
 -PluginPowerSaverBrowserTest.PosterTests 
 -PluginPowerSaverBrowserTest.SmallerThanPlayIcon 
 -PluginPowerSaverBrowserTest.SmallCrossOrigin 
+-BrowserTabRestoreTest.DelegateRestoreTabDisposition
+-StartupBrowserCreatorTest.ProfilesLaunchedAfterCrash
 
 # These might require to setup suid sandbox.
 -SandboxStatusUITest.testBPFSandboxEnabled 
@@ -146,4 +148,4 @@
 -SyncAwareCounterTest.PasswordCounter
 -SmartSessionRestoreTest.PRE_CorrectLoadingOrder
 -StartupHelperBrowserTest.ValidateCrx
--PrerenderBrowserTest.OpenTaskManagerBeforePrerender	
+-PrerenderBrowserTest.OpenTaskManagerBeforePrerender
