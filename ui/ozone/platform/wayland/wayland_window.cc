@@ -17,7 +17,6 @@
 #include "ui/ozone/platform/wayland/xdg_popup_wrapper_v6.h"
 #include "ui/ozone/platform/wayland/xdg_surface_wrapper_v5.h"
 #include "ui/ozone/platform/wayland/xdg_surface_wrapper_v6.h"
-#include "ui/platform_window/platform_window_delegate.h"
 
 namespace ui {
 
@@ -76,7 +75,8 @@ WaylandWindow::WaylandWindow(PlatformWindowDelegate* delegate,
     : delegate_(delegate),
       connection_(connection),
       xdg_shell_objects_factory_(new XDGShellObjectFactory()),
-      bounds_(bounds) {}
+      bounds_(bounds),
+      state_(ui::PlatformWindowState::PLATFORM_WINDOW_STATE_UNKNOWN) {}
 
 WaylandWindow::~WaylandWindow() {
   PlatformEventSource::GetInstance()->RemovePlatformEventDispatcher(this);
@@ -279,69 +279,67 @@ void WaylandWindow::ReleaseCapture() {
 }
 
 void WaylandWindow::ToggleFullscreen() {
-  // Don't fullscreen popup.
-  if (xdg_popup_)
-    return;
-
-  DCHECK(xdg_surface_);
+  DCHECK(xdg_surface_ && !xdg_popup_);
+  DCHECK(!IsMinimized());
 
   // TODO(msisov, tonikitoo): add multiscreen support. As the documentation says
   // if xdg_surface_set_fullscreen() is not provided with wl_output, it's up to
   // the compositor to choose which display will be used to map this surface.
-  if (!IsFullScreen())
+  if (!IsFullscreen()) {
+    // Client might have requested a fullscreen state while the window was in
+    // a maximized state. Thus, |restored_bounds_| can contain the bounds of a
+    // normal state before the window was maximized. If the |restored_bounds_|
+    // are empty, save the current bounds and request wayland to set window to
+    // be fullscreen. The |restored_bounds_| are reset once the state of the
+    // window becomes normal again.
+    if (restored_bounds_.IsEmpty())
+      restored_bounds_ = bounds_;
     xdg_surface_->SetFullscreen();
-  else
+  } else {
     xdg_surface_->UnSetFullscreen();
+  }
 
   connection_->ScheduleFlush();
 }
 
 void WaylandWindow::Maximize() {
-  // Don't maximize popup.
-  if (xdg_popup_ || IsMaximized())
-    return;
+  DCHECK(xdg_surface_ && !xdg_popup_);
+  DCHECK(!IsMaximized());
 
-  DCHECK(xdg_surface_);
-  // Unfullscreen the window if it is fullscreen.
-  if (IsFullScreen())
+  if (IsFullscreen())
     ToggleFullscreen();
 
-  previous_bounds_in_pixels_ = bounds_;
+  // Save previous bounds in order to restore them when wayland requests so.
+  // If there are previous restored bounds (ToggleFullscreen() saved bounds,
+  // check the comments above), use them.
+  if (restored_bounds_.IsEmpty())
+    restored_bounds_ = bounds_;
   xdg_surface_->SetMaximized();
   connection_->ScheduleFlush();
 }
 
 void WaylandWindow::Minimize() {
-  // Don't Minimize popup.
-  if (xdg_popup_)
-    return;
-
-  DCHECK(xdg_surface_);
-  if (IsMinimized())
-    return;
+  DCHECK(xdg_surface_ && !xdg_popup_);
+  DCHECK(!IsMinimized());
 
   xdg_surface_->SetMinimized();
   connection_->ScheduleFlush();
-  is_minimized_ = true;
-  was_minimized_ = false;
+
+  // Wayland doesn't say if a window is minimized. Handle this case manually
+  // here. We can track if the window was unminimized once wayland sends the
+  // window is activated, and the previous state was minimized.
+  state_ = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
 }
 
 void WaylandWindow::Restore() {
-  if (xdg_popup_ || !xdg_surface_)
-    return;
+  DCHECK(xdg_surface_ && !xdg_popup_);
 
   // Unfullscreen the window if it is fullscreen.
-  if (IsFullScreen())
+  if (IsFullscreen())
     ToggleFullscreen();
 
-  if (IsMaximized()) {
-    previous_bounds_in_pixels_ = bounds_;
-    xdg_surface_->UnSetMaximized();
-    connection_->ScheduleFlush();
-  }
-  if (is_minimized_)
-    was_minimized_ = is_minimized_;
-  is_minimized_ = false;
+  xdg_surface_->UnSetMaximized();
+  connection_->ScheduleFlush();
 }
 
 void WaylandWindow::SetCursor(PlatformCursor cursor) {
@@ -436,69 +434,49 @@ void WaylandWindow::HandleSurfaceConfigure(int32_t width,
                                            bool is_maximized,
                                            bool is_fullscreen,
                                            bool is_activated) {
-  // Handle restore state from wayland side: if the state was minimized and
-  // a user restore windows from panel tray, the only way to know that the
-  // window is restored is by checking if the window has been minimized and
-  // |is_activated| is set to true.
-  if (is_minimized_ && is_activated) {
-    is_minimized_ = false;
-    was_minimized_ = true;
+  // Change the window state only if the window is activated, because it's the
+  // only way to know if the window is not minimized.
+  if (is_activated) {
+    bool was_minimized = IsMinimized();
+
+    state_ = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_NORMAL;
+    if (is_maximized && !is_fullscreen)
+      state_ = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
+    else if (is_fullscreen)
+      state_ = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_FULLSCREEN;
+
+    // Do not flood the WindowServer unless the previous state was minimized.
+    if (was_minimized)
+      delegate_->OnWindowStateChanged(state_);
   }
-
-  bool was_maximized = is_maximized_;
-  ResetWindowStates();
-  is_maximized_ = is_maximized;
-  is_fullscreen_ = is_fullscreen;
-
-  // Width or height set 0 means that we should decide on width and height by
-  // ourselves, but we don't want to set to anything else. Use previous size.
-  if (width == 0 || height == 0) {
-    width = GetBounds().width();
-    height = GetBounds().height();
-    if (was_maximized) {
-      // In weston, unmaximize asks client to decide on bounds. It's ok if
-      // the state has been changed from normal to maximize and back to normal.
-      // In that case, previous bounds are known. But if the browser has been
-      // started in maximized mode, unmaximize bounds are unknown or better to
-      // say those correspond to the maximized state bounds. A client must
-      // decide which bounds to use. At this point, use half of the maximized
-      // bounds.
-      width = previous_bounds_in_pixels_.width();
-      height = previous_bounds_in_pixels_.height();
-      if (previous_bounds_in_pixels_ == GetBounds()) {
-        // TODO(msisov, tonikitoo): fix this hack.
-        width = width / 2;
-        height = height / 2;
-      }
-    }
-  }
-
-  ui::PlatformWindowState state =
-      ui::PlatformWindowState::PLATFORM_WINDOW_STATE_NORMAL;
-  if (IsMaximized())
-    state = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
-  else if (IsMinimized())
-    state = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
-
-  if ((previous_bounds_in_pixels_.IsEmpty() &&
-       IsMaximized() != was_maximized) ||
-      IsMinimized() != was_minimized_) {
-    delegate_->OnWindowStateChanged(state);
-    if (!is_minimized_)
-      was_minimized_ = false;
-  }
-
-  was_active_ = is_active_;
-  is_active_ = is_activated;
-  if (was_active_ != is_active_)
-    delegate_->OnActivationChanged(is_active_);
 
   // Rather than call SetBounds here for every configure event, just save the
   // most recent bounds, and have WaylandConnection call ApplyPendingBounds
   // when it has finished processing events. We may get many configure events
   // in a row during an interactive resize, and only the last one matters.
   pending_bounds_ = gfx::Rect(0, 0, width, height);
-  previous_bounds_in_pixels_ = gfx::Rect();
+
+  // Width or height set 0 means that we should decide on width and height by
+  // ourselves, but we don't want to set to anything else. Use restored bounds
+  // size or the current bounds.
+  //
+  // Hack: if the browser was started with --start-fullscreen and a user exits
+  // the fullscreen mode, wayland may set the width and height to be 1. Instead,
+  // explicitly set the bounds to the current desired ones or the previous
+  // bounds.
+  if (width == 0 || height == 0 || (width == 1 && height == 1)) {
+    pending_bounds_.set_size(restored_bounds_.IsEmpty()
+                                 ? GetBounds().size()
+                                 : restored_bounds_.size());
+  }
+
+  if (!IsFullscreen() && !IsMaximized())
+    restored_bounds_ = gfx::Rect();
+
+  was_active_ = is_active_;
+  is_active_ = is_activated;
+  if (was_active_ != is_active_)
+    delegate_->OnActivationChanged(is_active_);
 }
 
 void WaylandWindow::OnCloseRequest() {
@@ -508,21 +486,16 @@ void WaylandWindow::OnCloseRequest() {
   delegate_->OnCloseRequest();
 }
 
-bool WaylandWindow::IsMinimized() {
-  return is_minimized_;
+bool WaylandWindow::IsMinimized() const {
+  return state_ == ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
 }
 
-bool WaylandWindow::IsMaximized() {
-  return is_maximized_;
+bool WaylandWindow::IsMaximized() const {
+  return state_ == ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
 }
 
-bool WaylandWindow::IsFullScreen() {
-  return is_fullscreen_;
-}
-
-void WaylandWindow::ResetWindowStates() {
-  is_maximized_ = false;
-  is_fullscreen_ = false;
+bool WaylandWindow::IsFullscreen() const {
+  return state_ == ui::PlatformWindowState::PLATFORM_WINDOW_STATE_FULLSCREEN;
 }
 
 WaylandWindow* WaylandWindow::GetParentWindow() {

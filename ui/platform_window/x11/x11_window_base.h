@@ -148,9 +148,6 @@ class X11_WINDOW_EXPORT X11WindowBase : public PlatformWindow {
   // The bounds of |xwindow_|.
   gfx::Rect bounds_;
 
-  // The bounds of our window before we were maximized.
-  gfx::Rect restored_bounds_in_pixels_;
-
   // The point on xroot_window_, where a ButtonPress event occurred.
   // Used for interactive window drag/resize.
   gfx::Point xroot_window_event_location_;
@@ -159,7 +156,6 @@ class X11_WINDOW_EXPORT X11WindowBase : public PlatformWindow {
   std::set<::Atom> window_properties_;
 
   bool window_mapped_ = false;
-  bool is_fullscreen_ = false;
 
   DISALLOW_COPY_AND_ASSIGN(X11WindowBase);
 };
