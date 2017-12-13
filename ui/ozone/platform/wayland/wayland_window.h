@@ -11,6 +11,7 @@
 #include "ui/gfx/native_widget_types.h"
 #include "ui/ozone/platform/wayland/wayland_object.h"
 #include "ui/platform_window/platform_window.h"
+#include "ui/platform_window/platform_window_delegate.h"
 
 namespace ui {
 
@@ -105,6 +106,10 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
   PlatformWindowDelegate* delegate() { return delegate_; }
 
  private:
+  bool IsMinimized() const;
+  bool IsMaximized() const;
+  bool IsFullscreen() const;
+
   // TODO(msisov, tonikitoo): share this with X11WindowOzone and
   // DesktopWindowTreeHostX11.
   void ConvertEventLocationToCurrentWindowLocation(ui::Event* located_event);
@@ -118,14 +123,6 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
 
   // Tells if |this| has capture.
   bool HasCapture();
-
-  // TODO(msisov, tonikitoo): share this with X11WindowBase.
-  bool IsMinimized();
-  bool IsMaximized();
-  bool IsFullScreen();
-
-  // Resets the maximized and fullscreen window states.
-  void ResetWindowStates();
 
   // Gets a parent window for this window.
   WaylandWindow* GetParentWindow();
@@ -150,21 +147,18 @@ class WaylandWindow : public PlatformWindow, public PlatformEventDispatcher {
   scoped_refptr<BitmapCursorOzone> bitmap_;
 
   gfx::Rect bounds_;
-  gfx::Rect previous_bounds_in_pixels_;
   gfx::Rect pending_bounds_;
   bool has_pointer_focus_ = false;
   bool has_keyboard_focus_ = false;
   bool has_touch_focus_ = false;
 
-  bool is_minimized_ = false;
-  bool was_minimized_ = false;
-  bool is_maximized_ = false;
-  bool is_fullscreen_ = false;
-
   bool was_active_ = false;
   bool is_active_ = false;
 
   bool is_tooltip_ = false;
+
+  // Stores current states of the window.
+  ui::PlatformWindowState state_;
 
   DISALLOW_COPY_AND_ASSIGN(WaylandWindow);
 };

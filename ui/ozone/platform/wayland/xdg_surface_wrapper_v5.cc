@@ -129,34 +129,12 @@ void XDGSurfaceWrapperV5::Configure(void* data,
                                     uint32_t serial) {
   XDGSurfaceWrapperV5* surface = static_cast<XDGSurfaceWrapperV5*>(data);
 
-  bool is_maximized = false;
-  bool is_fullscreen = false;
-  bool is_activated = false;
-
-  // wl_array_for_each has a bug in upstream. It tries to assign void* to
-  // uint32_t *, which is not allowed in C++. Explicit cast should be
-  // performed. In other words, one just cannot assign void * to other pointer
-  // type implicitly in C++ as in C. We can't modify wayland-util.h, because
-  // it is fetched with gclient sync. Thus, use own loop.
-  // TODO(msisov, tonikitoo): use wl_array_for_each as soon as
-  // https://bugs.freedesktop.org/show_bug.cgi?id=101618 is resolved.
-  uint32_t* state = reinterpret_cast<uint32_t*>(states->data);
-  size_t array_size = states->size / sizeof(uint32_t);
-  for (size_t i = 0; i < array_size; i++) {
-    switch (state[i]) {
-      case (XDG_SURFACE_STATE_MAXIMIZED):
-        is_maximized = true;
-        break;
-      case (XDG_SURFACE_STATE_FULLSCREEN):
-        is_fullscreen = true;
-        break;
-      case (XDG_SURFACE_STATE_ACTIVATED):
-        is_activated = true;
-        break;
-      default:
-        break;
-    }
-  }
+  bool is_maximized =
+      CheckIfWlArrayHasValue(states, XDG_SURFACE_STATE_MAXIMIZED);
+  bool is_fullscreen =
+      CheckIfWlArrayHasValue(states, XDG_SURFACE_STATE_FULLSCREEN);
+  bool is_activated =
+      CheckIfWlArrayHasValue(states, XDG_SURFACE_STATE_ACTIVATED);
 
   surface->pending_configure_serial_ = serial;
   surface->wayland_window_->HandleSurfaceConfigure(width, height, is_maximized,

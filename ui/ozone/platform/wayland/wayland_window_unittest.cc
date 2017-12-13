@@ -71,8 +71,13 @@ class WaylandWindowTest : public WaylandTest {
 
   void SetWlArrayWithState(uint32_t state, wl_array* states) {
     uint32_t* s;
-    s = (uint32_t*)wl_array_add(states, sizeof *s);
+    s = static_cast<uint32_t*>(wl_array_add(states, sizeof *s));
     *s = state;
+  }
+
+  void InitializeWlArrayWithActivatedState(wl_array* states) {
+    wl_array_init(states);
+    SetWlArrayWithState(XDG_SURFACE_STATE_ACTIVATED, states);
   }
 
   wl::MockXdgSurface* xdg_surface;
@@ -91,7 +96,8 @@ TEST_P(WaylandWindowTest, SetTitle) {
 TEST_P(WaylandWindowTest, MaximizeAndRestore) {
   uint32_t serial = 12;
   wl_array states;
-  wl_array_init(&states);
+  InitializeWlArrayWithActivatedState(&states);
+
   SetWlArrayWithState(XDG_SURFACE_STATE_MAXIMIZED, &states);
 
   EXPECT_CALL(*GetXdgSurface(), SetMaximized());
@@ -108,13 +114,14 @@ TEST_P(WaylandWindowTest, Minimize) {
   window.Minimize();
 }
 
-TEST_P(WaylandWindowTest, SetFullScreenAndRestore) {
+TEST_P(WaylandWindowTest, SetFullscreenAndRestore) {
   wl_array states;
-  wl_array_init(&states);
+  InitializeWlArrayWithActivatedState(&states);
+
   SetWlArrayWithState(XDG_SURFACE_STATE_FULLSCREEN, &states);
 
-  EXPECT_CALL(*GetXdgSurface(), SetFullScreen());
-  EXPECT_CALL(*GetXdgSurface(), UnsetFullScreen());
+  EXPECT_CALL(*GetXdgSurface(), SetFullscreen());
+  EXPECT_CALL(*GetXdgSurface(), UnsetFullscreen());
   window.ToggleFullscreen();
   SendConfigureEvent(0, 0, 1, &states);
   Sync();
@@ -122,12 +129,12 @@ TEST_P(WaylandWindowTest, SetFullScreenAndRestore) {
   window.Restore();
 }
 
-TEST_P(WaylandWindowTest, SetMaximizedFullScreenAndRestore) {
+TEST_P(WaylandWindowTest, SetMaximizedFullscreenAndRestore) {
   wl_array states;
-  wl_array_init(&states);
+  InitializeWlArrayWithActivatedState(&states);
 
-  EXPECT_CALL(*GetXdgSurface(), SetFullScreen());
-  EXPECT_CALL(*GetXdgSurface(), UnsetFullScreen());
+  EXPECT_CALL(*GetXdgSurface(), SetFullscreen());
+  EXPECT_CALL(*GetXdgSurface(), UnsetFullscreen());
   EXPECT_CALL(*GetXdgSurface(), SetMaximized());
   EXPECT_CALL(*GetXdgSurface(), UnsetMaximized());
 
