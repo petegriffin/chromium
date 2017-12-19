@@ -58,8 +58,7 @@ void NavigateToNTPAndWaitUntilLoaded(Browser* browser) {
   // important that these two things happen in the same JS invocation, since
   // otherwise we might miss the message.
   bool mv_tiles_loaded = false;
-  ASSERT_TRUE(instant_test_utils::GetBoolFromJS(active_tab,
-                                                R"js(
+  const std::string r_script = R"js(
       (function() {
         if (tilesAreLoaded) {
           return true;
@@ -71,7 +70,8 @@ void NavigateToNTPAndWaitUntilLoaded(Browser* browser) {
         });
         return false;
       })()
-                                                )js",
+                                                )js";
+  ASSERT_TRUE(instant_test_utils::GetBoolFromJS(active_tab, r_script,
                                                 &mv_tiles_loaded));
 
   std::string message;
