@@ -20,6 +20,7 @@ void WaylandXkbKeyboardLayoutEngine::SetKeymap(xkb_keymap* keymap) {
       xkb_keymap_mod_get_index(keymap, XKB_MOD_NAME_CTRL);
   xkb_mod_indexes_.alt = xkb_keymap_mod_get_index(keymap, XKB_MOD_NAME_ALT);
   xkb_mod_indexes_.shift = xkb_keymap_mod_get_index(keymap, XKB_MOD_NAME_SHIFT);
+  xkb_mod_indexes_.caps = xkb_keymap_mod_get_index(keymap, XKB_MOD_NAME_CAPS);
 }
 
 void WaylandXkbKeyboardLayoutEngine::UpdateModifiers(uint32_t depressed_mods,
@@ -32,7 +33,8 @@ void WaylandXkbKeyboardLayoutEngine::UpdateModifiers(uint32_t depressed_mods,
   event_modifiers_->ResetKeyboardModifiers();
 
   auto component = static_cast<xkb_state_component>(XKB_STATE_MODS_DEPRESSED |
-                                                    XKB_STATE_MODS_LATCHED);
+                                                    XKB_STATE_MODS_LATCHED |
+                                                    XKB_STATE_MODS_LOCKED);
   if (xkb_state_mod_index_is_active(xkb_state_.get(), xkb_mod_indexes_.control,
                                     component))
     event_modifiers_->UpdateModifier(MODIFIER_CONTROL, true);
@@ -44,6 +46,12 @@ void WaylandXkbKeyboardLayoutEngine::UpdateModifiers(uint32_t depressed_mods,
   if (xkb_state_mod_index_is_active(xkb_state_.get(), xkb_mod_indexes_.shift,
                                     component))
     event_modifiers_->UpdateModifier(MODIFIER_SHIFT, true);
+
+  if (xkb_state_mod_index_is_active(xkb_state_.get(), xkb_mod_indexes_.caps,
+                                    component))
+    event_modifiers_->SetModifierLock(MODIFIER_CAPS_LOCK, true);
+  else
+    event_modifiers_->SetModifierLock(MODIFIER_CAPS_LOCK, false);
 }
 
 }  // namespace ui
