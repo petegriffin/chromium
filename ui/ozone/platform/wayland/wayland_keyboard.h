@@ -5,6 +5,8 @@
 #ifndef UI_OZONE_PLATFORM_WAYLAND_WAYLAND_KEYBOARD_H_
 #define UI_OZONE_PLATFORM_WAYLAND_WAYLAND_KEYBOARD_H_
 
+#include "base/time/time.h"
+#include "ui/events/event_auto_repeat_handler.h"
 #include "ui/events/event_modifiers.h"
 #include "ui/events/ozone/evdev/event_dispatch_callback.h"
 #include "ui/ozone/platform/wayland/wayland_object.h"
@@ -59,11 +61,19 @@ class WaylandKeyboard {
                          int32_t delay);
 
   void UpdateModifier(int modifier_flag, bool down);
+  void DispatchKeyEvent(uint32_t key,
+                        bool down,
+                        bool repeat,
+                        base::TimeTicks timestamp,
+                        int device_id);
 
   WaylandConnection* connection_ = nullptr;
   wl::Object<wl_keyboard> obj_;
   EventDispatchCallback callback_;
   EventModifiers event_modifiers_;
+
+  // Key repeat handler.
+  EventAutoRepeatHandler auto_repeat_handler_;
 };
 
 }  // namespace ui
