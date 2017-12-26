@@ -49,7 +49,7 @@ const unsigned int kModifiersMasks[] = {0,         // No additional modifier.
 WholeScreenMoveLoop::WholeScreenMoveLoop(views::X11MoveLoopDelegate* delegate)
     : delegate_(delegate),
       in_move_loop_(false),
-      grab_input_window_(None),
+      grab_input_window_(x11::None),
       grabbed_pointer_(false),
       canceled_(false),
       weak_factory_(this) {}
@@ -182,7 +182,7 @@ void WholeScreenMoveLoop::EndMoveLoop() {
   nested_dispatcher_.reset();
   grab_input_window_events_.reset();
   XDestroyWindow(display, grab_input_window_);
-  grab_input_window_ = None;
+  grab_input_window_ = x11::None;
   in_move_loop_ = false;
   quit_closure_.Run();
 }
@@ -192,7 +192,7 @@ bool WholeScreenMoveLoop::GrabPointer() {
 
   // Pass "owner_events" as false so that X sends all mouse events to
   // |grab_input_window_|.
-  int ret = ui::GrabPointer(grab_input_window_, false, None);
+  int ret = ui::GrabPointer(grab_input_window_, false, x11::None);
   if (ret != GrabSuccess) {
     DLOG(ERROR) << "Grabbing pointer for dragging failed: "
                 << ui::GetX11ErrorString(display, ret);
@@ -206,7 +206,7 @@ void WholeScreenMoveLoop::GrabEscKey() {
   unsigned int esc_keycode = XKeysymToKeycode(display, XK_Escape);
   for (size_t i = 0; i < arraysize(kModifiersMasks); ++i) {
     XGrabKey(display, esc_keycode, kModifiersMasks[i], grab_input_window_,
-             False, GrabModeAsync, GrabModeAsync);
+             x11::False, GrabModeAsync, GrabModeAsync);
   }
 }
 
@@ -214,7 +214,7 @@ void WholeScreenMoveLoop::CreateDragInputWindow(XDisplay* display) {
   unsigned long attribute_mask = CWEventMask | CWOverrideRedirect;
   XSetWindowAttributes swa;
   memset(&swa, 0, sizeof(swa));
-  swa.override_redirect = True;
+  swa.override_redirect = x11::True;
   grab_input_window_ = XCreateWindow(display, DefaultRootWindow(display), -100,
                                      -100, 10, 10, 0, CopyFromParent, InputOnly,
                                      CopyFromParent, attribute_mask, &swa);
