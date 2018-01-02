@@ -15,6 +15,10 @@
 #include "base/run_loop.h"
 #include "base/strings/string_number_conversions.h"
 
+#if BUILDFLAG(USE_XKBCOMMON)
+#include "ui/events/keycodes/keyboard_code_conversion.h"
+#endif
+
 namespace wl {
 namespace {
 
@@ -412,6 +416,16 @@ MockKeyboard::MockKeyboard(wl_resource* resource) : ServerObject(resource) {
 
 MockKeyboard::~MockKeyboard() {}
 
+#if BUILDFLAG(USE_XKBCOMMON)
+bool MockWaylandXkbKeyboardLayoutEngine::Lookup(
+    ui::DomCode dom_code,
+    int event_flags,
+    ui::DomKey* dom_key,
+    ui::KeyboardCode* key_code) const {
+  return DomCodeToUsLayoutDomKey(dom_code, event_flags, dom_key, key_code);
+}
+#endif
+
 MockTouch::MockTouch(wl_resource* resource) : ServerObject(resource) {
   wl_resource_set_implementation(resource, &touch_impl, this,
                                  &ServerObject::OnResourceDestroyed);
@@ -474,7 +488,7 @@ void MockCompositor::AddSurface(std::unique_ptr<MockSurface> surface) {
 
 MockOutput::MockOutput()
     : Global(&wl_output_interface, nullptr, kOutputVersion),
-	  rect_(0, 0, 1024, 768) {}
+         rect_(0, 0, 1024, 768) {}
 
 MockOutput::~MockOutput() {}
 
