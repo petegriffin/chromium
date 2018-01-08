@@ -45,7 +45,7 @@ ACTION_P(CloneEvent, ptr) {
   *ptr = Event::Clone(*arg0);
 }
 
-TEST_P(WaylandKeyboardTest, Keypress) {
+TEST_P(WaylandKeyboardTest, Keypress_DISABLED) {
   struct wl_array empty;
   wl_array_init(&empty);
   wl_keyboard_send_enter(keyboard->resource(), 1, surface->resource(), &empty);
