@@ -57,8 +57,7 @@
           "external_window_tree_factory",
           "ime_registrar",
           "input_device_controller",
-          "window_manager",
-          "window_tree_host_factory_registrar"
+          "window_manager"
         ],
         "util_win" : [ "shell_util_win" ],
         "wifi_util_win": [ "wifi_credentials" ]
