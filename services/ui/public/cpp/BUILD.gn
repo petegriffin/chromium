@@ -73,8 +73,6 @@ source_set("internal") {
     "//ui/gfx/geometry",
   ]
 
-  data_deps = []
-
   defines = [ "GL_GLEXT_PROTOTYPES" ]
 
   if (use_ozone) {

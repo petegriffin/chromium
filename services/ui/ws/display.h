@@ -39,7 +39,6 @@ class DisplayBinding;
 class DisplayManager;
 class FocusController;
 class WindowManagerDisplayRoot;
-class WindowManagerState;
 class WindowServer;
 class WindowTree;
 
