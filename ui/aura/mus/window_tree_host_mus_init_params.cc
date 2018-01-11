@@ -36,6 +36,10 @@ WindowTreeHostMusInitParams CreateInitParamsForTopLevel(
       static_cast<WindowTreeHostMusDelegate*>(window_tree_client)
           ->CreateWindowPortForTopLevel(&properties);
   params.properties = std::move(properties);
+#if defined(USE_OZONE) && defined(OS_LINUX) && !defined(OS_CHROMEOS)
+  params.use_classic_ime =
+      !base::CommandLine::ForCurrentProcess()->HasSwitch("use-ime-service");
+#endif
   return params;
 }
 
