@@ -60,8 +60,6 @@ int main(int argc, const char** argv) {
     base::CommandLine::ForCurrentProcess()->AppendSwitchASCII(
         switches::kMus, switches::kMusHostVizValue);
     params.env_mode = aura::Env::Mode::MUS;
-  } else {
-    LOG(FATAL) << "Ozone Linux builds can only be run with --mus flag.";
   }
 #endif
 
