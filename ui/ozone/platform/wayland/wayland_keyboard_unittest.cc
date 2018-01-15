@@ -8,10 +8,15 @@
 #include "testing/gmock/include/gmock/gmock.h"
 #include "testing/gtest/include/gtest/gtest.h"
 #include "ui/events/event.h"
+#include "ui/events/ozone/layout/keyboard_layout_engine_manager.h"
 #include "ui/ozone/platform/wayland/fake_server.h"
 #include "ui/ozone/platform/wayland/mock_platform_window_delegate.h"
 #include "ui/ozone/platform/wayland/wayland_test.h"
 #include "ui/ozone/platform/wayland/wayland_window.h"
+
+#if BUILDFLAG(USE_XKBCOMMON)
+#include "ui/ozone/platform/wayland/mock_wayland_xkb_keyboard_layout_engine.h"
+#endif
 
 using ::testing::SaveArg;
 using ::testing::_;
@@ -33,6 +38,14 @@ class WaylandKeyboardTest : public WaylandTest {
     keyboard = server.seat()->keyboard.get();
     ASSERT_TRUE(keyboard);
   }
+
+#if BUILDFLAG(USE_XKBCOMMON)
+  void SimulateCapsLockON() {
+    auto* engine = static_cast<MockWaylandXkbKeyboardLayoutEngine*>(
+        KeyboardLayoutEngineManager::GetKeyboardLayoutEngine());
+    engine->event_modifiers_->SetModifierLock(MODIFIER_CAPS_LOCK, true);
+  }
+#endif
 
  protected:
   wl::MockKeyboard* keyboard;
@@ -73,6 +86,54 @@ TEST_P(WaylandKeyboardTest, Keypress) {
                        WL_KEYBOARD_KEY_STATE_PRESSED);
   EXPECT_CALL(delegate, DispatchEvent(_)).Times(0);
 }
+
+#if BUILDFLAG(USE_XKBCOMMON)
+TEST_P(WaylandKeyboardTest, CapsLockKeypress) {
+  struct wl_array empty;
+  wl_array_init(&empty);
+  wl_keyboard_send_enter(keyboard->resource(), 1, surface->resource(), &empty);
+  wl_array_release(&empty);
+
+  // Capslock
+  wl_keyboard_send_key(keyboard->resource(), 2, 0, 58 /* Capslock */,
+                       WL_KEYBOARD_KEY_STATE_PRESSED);
+
+  //wl_keyboard_send_modifiers(keyboard->resource(), 3, 2 /* mods_depressed*/, 0 /* mods_latched */, 2 /* mods_locked */, 0 /* group */);
+
+  std::unique_ptr<Event> event;
+  EXPECT_CALL(delegate, DispatchEvent(_)).WillOnce(CloneEvent(&event));
+
+  Sync();
+  ASSERT_TRUE(event);
+  ASSERT_TRUE(event->IsKeyEvent());
+
+  auto* key_event = event->AsKeyEvent();
+
+  EXPECT_EQ(ui::EF_MOD3_DOWN, key_event->flags());
+  EXPECT_EQ(ui::VKEY_CAPITAL, key_event->key_code());
+  EXPECT_EQ(ET_KEY_PRESSED, key_event->type());
+
+  Sync();
+
+  SimulateCapsLockON();
+
+  wl_keyboard_send_key(keyboard->resource(), 2, 0, 58 /* Capslock */,
+                       WL_KEYBOARD_KEY_STATE_RELEASED);
+
+  std::unique_ptr<Event> event2;
+  EXPECT_CALL(delegate, DispatchEvent(_)).WillOnce(CloneEvent(&event2));
+
+  Sync();
+  ASSERT_TRUE(event2);
+  ASSERT_TRUE(event2->IsKeyEvent());
+
+  auto* key_event2 = event2->AsKeyEvent();
+
+  EXPECT_EQ(ui::EF_CAPS_LOCK_ON, key_event2->flags());
+  //EXPECT_EQ(ui::VKEY_MENU, key_event2->key_code());
+  EXPECT_EQ(ET_KEY_RELEASED, key_event2->type());
+}
+#endif
 
 INSTANTIATE_TEST_CASE_P(XdgVersionV5Test,
                         WaylandKeyboardTest,

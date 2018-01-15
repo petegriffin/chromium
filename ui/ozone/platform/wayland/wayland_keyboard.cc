@@ -135,6 +135,7 @@ void WaylandKeyboard::Modifiers(void* data,
                                 uint32_t mods_locked,
                                 uint32_t group) {
 #if BUILDFLAG(USE_XKBCOMMON)
+  printf("WaylandKeyboard::Modifiers dep:%d lat:%d locked:%d group:%d\n", mods_depressed, mods_latched, mods_locked, group);
   auto* engine = static_cast<WaylandXkbKeyboardLayoutEngine*>(
       KeyboardLayoutEngineManager::GetKeyboardLayoutEngine());
   engine->UpdateModifiers(mods_depressed, mods_latched, mods_locked, group);
@@ -163,6 +164,7 @@ void WaylandKeyboard::DispatchKeyEvent(uint32_t key,
   if (dom_code == ui::DomCode::NONE)
     return;
 
+  printf("::Key %d\n", key);
   uint8_t flags = event_modifiers_.GetModifierFlags();
   DomKey dom_key;
   KeyboardCode key_code;

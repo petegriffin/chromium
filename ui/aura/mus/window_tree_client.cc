@@ -1589,6 +1589,8 @@ void WindowTreeClient::OnWindowInputEvent(
   }
 
   if (event->IsKeyEvent()) {
+    ui::KeyEvent* e = event->AsKeyEvent();
+    printf("WindowTreeClient::%s flags:%d\n", __FUNCTION__, e->flags());
     InputMethodMus* input_method = GetWindowTreeHostMus(window)->input_method();
     if (input_method) {
       ignore_result(input_method->DispatchKeyEvent(

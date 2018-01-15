@@ -75,6 +75,7 @@ void EventAutoRepeatHandler::StopKeyRepeat() {
 }
 
 void EventAutoRepeatHandler::ScheduleKeyRepeat(const base::TimeDelta& delay) {
+  printf("EventAutoRepeatHandler::%s\n", __FUNCTION__);
   base::ThreadTaskRunnerHandle::Get()->PostDelayedTask(
       FROM_HERE,
       base::Bind(&EventAutoRepeatHandler::OnRepeatTimeout,
@@ -86,6 +87,7 @@ void EventAutoRepeatHandler::OnRepeatTimeout(unsigned int sequence) {
   if (repeat_sequence_ != sequence)
     return;
 
+  printf("EventAutoRepeatHandler::%s\n", __FUNCTION__);
   // Post a task behind any pending key releases in the message loop
   // FIFO. This ensures there's no spurious repeats during periods of UI
   // thread jank.
@@ -94,6 +96,7 @@ void EventAutoRepeatHandler::OnRepeatTimeout(unsigned int sequence) {
                             weak_ptr_factory_.GetWeakPtr(), repeat_sequence_));
 }
 void EventAutoRepeatHandler::OnRepeatCommit(unsigned int sequence) {
+  printf("EventAutoRepeatHandler::%s\n", __FUNCTION__);
   if (repeat_sequence_ != sequence)
     return;
 

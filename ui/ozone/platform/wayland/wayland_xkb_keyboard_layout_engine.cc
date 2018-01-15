@@ -48,14 +48,16 @@ void WaylandXkbKeyboardLayoutEngineImpl::UpdateModifiers(
                                     component))
     event_modifiers_->UpdateModifier(MODIFIER_SHIFT, true);
 
+/*
   if (xkb_state_mod_index_is_active(xkb_state_.get(), xkb_mod_indexes_.caps,
                                     component))
     event_modifiers_->SetModifierLock(MODIFIER_CAPS_LOCK, true);
   else
     event_modifiers_->SetModifierLock(MODIFIER_CAPS_LOCK, false);
+*/
 }
 
-void WaylandXkbKeyboardLayoutEngineImpl::SetEventModifiers(
+void WaylandXkbKeyboardLayoutEngine::SetEventModifiers(
     EventModifiers* event_modifiers) {
   event_modifiers_ = event_modifiers;
 }
