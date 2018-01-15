@@ -4,6 +4,9 @@
 
 #include "ui/aura/mus/window_tree_host_mus_init_params.h"
 
+#if defined(USE_OZONE) && defined(OS_LINUX) && !defined(OS_CHROMEOS)
+#include "base/command_line.h"
+#endif
 #include "ui/aura/mus/window_port_mus.h"
 #include "ui/aura/mus/window_tree_client.h"
 #include "ui/display/display.h"
