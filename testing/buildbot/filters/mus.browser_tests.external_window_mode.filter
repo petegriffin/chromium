@@ -7,6 +7,7 @@
 -BrowserTabRestoreTest.DelegateRestoreTabDisposition
 -StartupBrowserCreatorTest.ProfilesLaunchedAfterCrash
 -InterventionsInternalsUITest.LogNewMessage
+-PaymentRequestShippingAddressEditorTest.AddImpossiblePhoneNumber
 # flaky both on stock and mus chromium
 -WebRtcDesktopCaptureBrowserTest.RunsScreenshareFromOneTabToAnother
 
@@ -154,3 +155,10 @@
 -SmartSessionRestoreTest.PRE_CorrectLoadingOrder
 -StartupHelperBrowserTest.ValidateCrx
 -PrerenderBrowserTest.OpenTaskManagerBeforePrerender
+-ContentCapabilitiesTest.ExtensionUnlimitedStorageIsIsolated
+-PreviewsNoScriptBrowserTest.NoScriptPreviewsEnabledButNoTransformDirective
+-DeviceManagementServiceIntegrationTestInstance/DeviceManagementServiceIntegrationTest.AutoEnrollment/0
+-IdentityGetProfileUserInfoFunctionTest.NotSignedInNoEmail
+-InProcessBrowserTest.AfterStartupTaskUtils
+-SupervisedUserServiceTest.ClearOmitOnRegistration
+-SupervisedUserServiceTest.LocalPolicies
