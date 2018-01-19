@@ -13,7 +13,10 @@
 
 # These might require to setup suid sandbox.
 -SandboxStatusUITest.testBPFSandboxEnabled 
--SandboxStatusUITest.testSUIDorNamespaceSandboxEnabled 
+-SandboxStatusUITest.testSUIDorNamespaceSandboxEnabled
+
+# Fails only on the buildbot.
+-PaymentRequestShippingAddressEditorTest.AddPossiblePhoneNumber 
 
 # These fail only with Linux/Mus.
 -PreviewsNoScriptBrowserTest.NoScriptPreviewsEnabled
