@@ -77,7 +77,7 @@ WaylandWindow::WaylandWindow(PlatformWindowDelegate* delegate,
       connection_(connection),
       xdg_shell_objects_factory_(new XDGShellObjectFactory()),
       bounds_(bounds),
-      state_(ui::PlatformWindowState::PLATFORM_WINDOW_STATE_UNKNOWN) {}
+      state_(PlatformWindowState::PLATFORM_WINDOW_STATE_UNKNOWN) {}
 
 WaylandWindow::~WaylandWindow() {
   PlatformEventSource::GetInstance()->RemovePlatformEventDispatcher(this);
@@ -281,7 +281,6 @@ void WaylandWindow::ReleaseCapture() {
 
 void WaylandWindow::ToggleFullscreen() {
   DCHECK(xdg_surface_ && !xdg_popup_);
-  DCHECK(!IsMinimized());
 
   // TODO(msisov, tonikitoo): add multiscreen support. As the documentation says
   // if xdg_surface_set_fullscreen() is not provided with wl_output, it's up to
@@ -305,7 +304,6 @@ void WaylandWindow::ToggleFullscreen() {
 
 void WaylandWindow::Maximize() {
   DCHECK(xdg_surface_ && !xdg_popup_);
-  DCHECK(!IsMaximized());
 
   if (IsFullscreen())
     ToggleFullscreen();
@@ -321,7 +319,6 @@ void WaylandWindow::Maximize() {
 
 void WaylandWindow::Minimize() {
   DCHECK(xdg_surface_ && !xdg_popup_);
-  DCHECK(!IsMinimized());
 
   DCHECK(xdg_surface_);
   xdg_surface_->SetMinimized();
@@ -330,7 +327,7 @@ void WaylandWindow::Minimize() {
   // Wayland doesn't say if a window is minimized. Handle this case manually
   // here. We can track if the window was unminimized once wayland sends the
   // window is activated, and the previous state was minimized.
-  state_ = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
+  state_ = PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
 }
 
 void WaylandWindow::Restore() {
@@ -428,21 +425,19 @@ void WaylandWindow::HandleSurfaceConfigure(int32_t width,
                                            bool is_maximized,
                                            bool is_fullscreen,
                                            bool is_activated) {
-  // Change the window state only if the window is activated, because it's the
-  // only way to know if the window is not minimized.
-  if (is_activated) {
-    bool was_minimized = IsMinimized();
+  // Propagate the window state information to the client.
+  PlatformWindowState old_state = state_;
+  if (IsMinimized() && !is_activated)
+    state_ = PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
+  else if (is_fullscreen)
+    state_ = PlatformWindowState::PLATFORM_WINDOW_STATE_FULLSCREEN;
+  else if (is_maximized)
+    state_ = PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
+  else
+    state_ = PlatformWindowState::PLATFORM_WINDOW_STATE_NORMAL;
 
-    state_ = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_NORMAL;
-    if (is_maximized && !is_fullscreen)
-      state_ = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
-    else if (is_fullscreen)
-      state_ = ui::PlatformWindowState::PLATFORM_WINDOW_STATE_FULLSCREEN;
-
-    // Do not flood the WindowServer unless the previous state was minimized.
-    if (was_minimized)
-      delegate_->OnWindowStateChanged(state_);
-  }
+  if (old_state != state_)
+    delegate_->OnWindowStateChanged(state_);
 
   // Rather than call SetBounds here for every configure event, just save the
   // most recent bounds, and have WaylandConnection call ApplyPendingBounds
@@ -481,15 +476,15 @@ void WaylandWindow::OnCloseRequest() {
 }
 
 bool WaylandWindow::IsMinimized() const {
-  return state_ == ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
+  return state_ == PlatformWindowState::PLATFORM_WINDOW_STATE_MINIMIZED;
 }
 
 bool WaylandWindow::IsMaximized() const {
-  return state_ == ui::PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
+  return state_ == PlatformWindowState::PLATFORM_WINDOW_STATE_MAXIMIZED;
 }
 
 bool WaylandWindow::IsFullscreen() const {
-  return state_ == ui::PlatformWindowState::PLATFORM_WINDOW_STATE_FULLSCREEN;
+  return state_ == PlatformWindowState::PLATFORM_WINDOW_STATE_FULLSCREEN;
 }
 
 WaylandWindow* WaylandWindow::GetParentWindow() {
