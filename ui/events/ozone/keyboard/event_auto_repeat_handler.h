@@ -2,22 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef UI_EVENTS_OZONE_EVDEV_EVENT_AUTO_REPEAT_HANDLER_H
-#define UI_EVENTS_OZONE_EVDEV_EVENT_AUTO_REPEAT_HANDLER_H
+#ifndef UI_EVENTS_OZONE_KEYBOARD_EVENT_AUTO_REPEAT_HANDLER_H
+#define UI_EVENTS_OZONE_KEYBOARD_EVENT_AUTO_REPEAT_HANDLER_H
 
 #include <linux/input.h>
 
 #include "base/callback.h"
 #include "base/memory/weak_ptr.h"
 #include "base/time/time.h"
-#include "ui/events/events_export.h"
+#include "ui/events/ozone/events_ozone_export.h"
 
 namespace ui {
 
-class EVENTS_EXPORT EventAutoRepeatHandler {
+class EVENTS_OZONE_EXPORT EventAutoRepeatHandler {
  public:
   class Delegate {
    public:
+    // Gives the client a chance to flush the input queue
+    // cancelling possible spurios auto repeat keys.
+    // Useful under janky situations.
+    virtual void FlushInput(base::OnceClosure closure) = 0;
     virtual void DispatchKey(unsigned int key,
                              bool down,
                              bool repeat,
@@ -32,6 +36,7 @@ class EVENTS_EXPORT EventAutoRepeatHandler {
                        bool down,
                        bool suppress_auto_repeat,
                        int device_id);
+  void StopKeyRepeat();
 
   // Configuration for key repeat.
   bool IsAutoRepeatEnabled();
@@ -42,7 +47,6 @@ class EVENTS_EXPORT EventAutoRepeatHandler {
 
  private:
   void StartKeyRepeat(unsigned int key, int device_id);
-  void StopKeyRepeat();
   void ScheduleKeyRepeat(const base::TimeDelta& delay);
   void OnRepeatTimeout(unsigned int sequence);
   void OnRepeatCommit(unsigned int sequence);
@@ -64,4 +68,4 @@ class EVENTS_EXPORT EventAutoRepeatHandler {
 
 }  // namespace ui
 
-#endif  // UI_EVENTS_OZONE_EVDEV_EVENT_AUTO_REPEAT_HANDLER_H
+#endif  // UI_EVENTS_OZONE_KEYBOARD_EVENT_AUTO_REPEAT_HANDLER_H
