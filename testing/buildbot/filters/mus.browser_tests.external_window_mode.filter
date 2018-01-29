@@ -187,3 +187,21 @@
 -SSLUITestWithExtendedReporting.TestBrokenHTTPSProceedShowNoCheckYesReportNo/1
 -WebUsbTest.AddRemoveDevice
 -ChromeOriginTrialsDisabledFeaturesTest.DisabledFeaturesSetOnCommandLine/0
+
+# These will fail 'till --enable-viz works
+# They need ImageTransportFactory::SetFactory(..) to be properly called
+# which only happens today if "browser is hosting viz".
+-CastStreamingApiTest.BadLogging
+-CastStreamingApiTest.Basics
+-CastStreamingApiTest.DestinationNotSet
+-CastStreamingApiTest.NullStream
+-CastStreamingApiTest.Stats
+-CastStreamingApiTest.StopNoStart
+-CastStreamingApiTestWithPixelOutput.RtpStreamError
+-TabCaptureApiTest.ActiveTabPermission
+-TabCaptureApiTest.ApiTests
+-TabCaptureApiTest.CaptureInSplitIncognitoMode
+-TabCaptureApiTest.Constraints
+-TabCaptureApiTest.GrantForChromePages
+-TabCaptureApiTest.MaxOffscreenTabs
+-TabCaptureApiTest.TabIndicator
