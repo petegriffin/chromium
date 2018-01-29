@@ -1989,23 +1989,6 @@ void WindowTree::SetWindowProperty(
   }
   const bool success = window && access_policy_->CanSetWindowProperties(window);
   if (success) {
-    if (window_server_->IsInExternalWindowMode()) {
-      WindowManagerDisplayRoot* display_root =
-          GetWindowManagerDisplayRoot(window);
-      if (display_root && display_root->GetClientVisibleRoot() == window) {
-        Operation op(this, window_server_, OperationType::SET_WINDOW_PROPERTY);
-        Display* display = GetDisplay(window);
-        DCHECK(display);
-        if (!value.has_value()) {
-          display->SetProperty(name, nullptr);
-        } else {
-          display->SetProperty(name, &value.value());
-        }
-        client()->OnChangeCompleted(change_id, success);
-        return;
-      }
-    }
-
     Operation op(this, window_server_, OperationType::SET_WINDOW_PROPERTY);
     if (!value.has_value()) {
       window->SetProperty(name, nullptr);

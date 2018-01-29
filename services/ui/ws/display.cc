@@ -218,14 +218,10 @@ void Display::SetBounds(const gfx::Rect& bounds) {
 
 void Display::SetProperty(const std::string& name, const std::vector<uint8_t>* value) {
   DCHECK(window_server_->IsInExternalWindowMode());
+  DCHECK(name == mojom::WindowManager::kShowState_Property);
 
-  if (name == mojom::WindowManager::kShowState_Property) {
-    const int64_t state = mojo::ConvertTo<int64_t>(*value);
-    platform_display_->SetNativeWindowState(static_cast<ui::mojom::ShowState>(state));
-  }
-
-  for (auto& pair : window_manager_display_root_map_)
-    pair.second->root()->SetProperty(name, value);
+  const int64_t state = mojo::ConvertTo<int64_t>(*value);
+  platform_display_->SetNativeWindowState(static_cast<ui::mojom::ShowState>(state));
 }
 
 void Display::SetVisible(bool value) {
