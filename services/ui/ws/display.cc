@@ -207,18 +207,13 @@ void Display::SetImeVisibility(ServerWindow* window, bool visible) {
 }
 
 void Display::SetBounds(const gfx::Rect& bounds) {
+  DCHECK(window_server_->IsInExternalWindowMode());
   platform_display_->SetViewportBounds(bounds);
 
   if (root_->bounds() == bounds)
     return;
 
   root_->SetBounds(bounds, allocator_.GenerateId());
-
-  // WindowManagerDisplayRoot::root_ needs to be at 0,0 position relative
-  // to its parent not to break mouse/touch events.
-  for (auto& pair : window_manager_display_root_map_)
-    pair.second->root()->SetBounds(gfx::Rect(bounds.size()),
-                                   allocator_.GenerateId());
 }
 
 void Display::SetProperty(const std::string& name, const std::vector<uint8_t>* value) {

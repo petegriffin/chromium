@@ -1926,19 +1926,6 @@ void WindowTree::SetWindowBounds(
   // Only the owner of the window can change the bounds.
   bool success = access_policy_->CanSetWindowBounds(window);
   if (success) {
-    if (window_server_->IsInExternalWindowMode()) {
-      WindowManagerDisplayRoot* display_root =
-          GetWindowManagerDisplayRoot(window);
-      if (display_root && display_root->GetClientVisibleRoot() == window) {
-        Operation op(this, window_server_, OperationType::SET_WINDOW_BOUNDS);
-        Display* display = GetDisplay(window);
-        DCHECK(display);
-        display->SetBounds(bounds);
-        client()->OnChangeCompleted(change_id, success);
-        return;
-      }
-    }
-
     Operation op(this, window_server_, OperationType::SET_WINDOW_BOUNDS);
     window->SetBounds(bounds, local_surface_id);
   } else {
