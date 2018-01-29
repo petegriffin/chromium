@@ -752,18 +752,6 @@ bool WindowTree::SetWindowVisibility(const ClientWindowId& window_id,
   if (window->visible() == visible)
     return true;
 
-  if (window_server_->IsInExternalWindowMode()) {
-    WindowManagerDisplayRoot* display_root =
-        GetWindowManagerDisplayRoot(window);
-    if (display_root && display_root->GetClientVisibleRoot() == window) {
-      Operation op(this, window_server_, OperationType::SET_WINDOW_VISIBILITY);
-      Display* display = GetDisplay(window);
-      DCHECK(display);
-      display->SetVisible(visible);
-      return true;
-    }
-  }
-
   Operation op(this, window_server_, OperationType::SET_WINDOW_VISIBILITY);
   window->SetVisible(visible);
   return true;

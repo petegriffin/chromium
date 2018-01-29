@@ -43,5 +43,14 @@ void ExternalWindowDisplayRootWindow::SetProperty(
   ServerWindow::SetProperty(name, value);
 }
 
+void ExternalWindowDisplayRootWindow::SetVisible(bool value) {
+  Display* display =
+      window_server_->display_manager()->GetDisplayContaining(this);
+  if (display)
+    display->SetVisible(value);
+
+  ServerWindow::SetVisible(value);
+}
+
 }  // namespace ws
 }  // namespace ui

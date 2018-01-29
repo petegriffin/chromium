@@ -226,11 +226,7 @@ void Display::SetProperty(const std::string& name, const std::vector<uint8_t>* v
 
 void Display::SetVisible(bool value) {
   DCHECK(window_server_->IsInExternalWindowMode());
-
   platform_display_->SetWindowVisibility(value);
-
-  for (auto& pair : window_manager_display_root_map_)
-    pair.second->root()->SetVisible(value);
 }
 
 void Display::OnWillDestroyTree(WindowTree* tree) {

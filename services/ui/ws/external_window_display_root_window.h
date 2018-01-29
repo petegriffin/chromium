@@ -31,6 +31,7 @@ class ExternalWindowDisplayRootWindow : public ServerWindow {
                      base::nullopt) override;
   void SetProperty(const std::string& name,
                    const std::vector<uint8_t>* value) override;
+  void SetVisible(bool value) override;
 
  private:
   WindowServer* window_server_ = nullptr;
