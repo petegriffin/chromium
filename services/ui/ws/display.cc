@@ -376,12 +376,14 @@ EventSink* Display::GetEventSink() {
 }
 
 void Display::OnAcceleratedWidgetAvailable() {
-  display_manager()->OnDisplayAcceleratedWidgetAvailable(this);
-
+  // OnDisplayAcceleratedWidgetAvailable requires window manager state to be
+  // installed, otherwise the accelerated widget won't be propagated.
   if (window_server_->IsInExternalWindowMode())
     InitDisplayRoot();
   else
     InitWindowManagerDisplayRoots();
+
+  display_manager()->OnDisplayAcceleratedWidgetAvailable(this);
 }
 
 void Display::OnNativeCaptureLost() {
