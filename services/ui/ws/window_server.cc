@@ -897,27 +897,6 @@ void WindowServer::CreateFrameSinkManager() {
       std::move(frame_sink_manager));
 }
 
-void WindowServer::SetNativeWindowVisibility(
-    WindowManagerDisplayRoot* display_root,
-    bool visible) {
-  if (!IsInExternalWindowMode())
-    return;
-  PlatformDisplay* display = display_root->display()->platform_display();
-  DCHECK(display);
-  display->SetWindowVisibility(visible);
-}
-
-void WindowServer::SetNativeWindowState(ServerWindow* window,
-                                        ui::mojom::ShowState state) {
-  WindowManagerDisplayRoot* display_root =
-      display_manager_->GetWindowManagerDisplayRoot(window);
-  if (!display_root || display_root->GetClientVisibleRoot() != window)
-    return;
-  PlatformDisplay* display = display_root->display()->platform_display();
-  DCHECK(display);
-  display->SetNativeWindowState(state);
-}
-
 ServerWindow* WindowServer::GetRootWindowForDrawn(const ServerWindow* window) {
   Display* display = display_manager_->GetDisplayContaining(window);
   return display ? display->root_window() : nullptr;
@@ -1062,8 +1041,6 @@ void WindowServer::OnWindowVisibilityChanged(ServerWindow* window) {
   if (display_root) {
     display_root->window_manager_state()
         ->ReleaseCaptureBlockedByAnyModalWindow();
-    if (display_root->GetClientVisibleRoot() == window)
-      SetNativeWindowVisibility(display_root, window->visible());
   }
 }
 
@@ -1090,12 +1067,6 @@ void WindowServer::OnWindowSharedPropertyChanged(
     ServerWindow* window,
     const std::string& name,
     const std::vector<uint8_t>* new_data) {
-  if (IsInExternalWindowMode() &&
-      name == mojom::WindowManager::kShowState_Property) {
-    const int64_t state = mojo::ConvertTo<int64_t>(*new_data);
-    SetNativeWindowState(window, static_cast<ui::mojom::ShowState>(state));
-  }
-
   for (auto& pair : tree_map_) {
     pair.second->ProcessWindowPropertyChanged(window, name, new_data,
                                               IsOperationSource(pair.first));
