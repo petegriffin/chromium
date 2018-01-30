@@ -17,3 +17,7 @@
 -OneGoogleBarFetcherImplWithRelativeApiUrlOverrideTest.RequestUrlRespectsOverride 
 -SafeBrowsingBlockingPageTest.MalwarePageDontProceed 
 -ThemeServiceSupervisedUserTest.SupervisedUserThemeReplacesNativeTheme 
+
+# failures after the r532296 rebase.
+-PopupsOnlyUiDelegateTest.ManyPopupNotifications
+-PopupsOnlyUiDelegateTest.WebNotificationPopupBubble

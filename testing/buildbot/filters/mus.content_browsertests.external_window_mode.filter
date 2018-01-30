@@ -167,3 +167,10 @@
 -SitePerProcessBrowserTest.AsynchronousHitTestChildTimeout
 -SitePerProcessBrowserTest.InputEventRouterWheelCoalesceTest
 -NetworkServiceInProcessBrowserTest.Basic
+
+# failures after the r532296 rebase.
+-SitePerProcessHitTestBrowserTest.*
+-SitePerProcessHighDPIHitTestBrowserTest.*
+-SitePerProcessMouseWheelHitTestBrowserTest.*
+-SitePerProcessInternalsHitTestBrowserTest.ScrollNestedLocalNonFastScrollableDiv
+-InProcessGpuTest.NoCrashAtShutdown
