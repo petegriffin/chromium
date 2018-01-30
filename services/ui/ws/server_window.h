@@ -103,7 +103,7 @@ class ServerWindow : public viz::HostFrameSinkClient {
   const gfx::Rect& bounds() const { return bounds_; }
   // Sets the bounds. If the size changes this implicitly resets the client
   // area to fill the whole bounds.
-  void SetBounds(const gfx::Rect& bounds,
+  virtual void SetBounds(const gfx::Rect& bounds,
                  const base::Optional<viz::LocalSurfaceId>& local_surface_id =
                      base::nullopt);
 
@@ -172,7 +172,7 @@ class ServerWindow : public viz::HostFrameSinkClient {
   // Returns the visibility requested by this window. IsDrawn() returns whether
   // the window is actually visible on screen.
   bool visible() const { return visible_; }
-  void SetVisible(bool value);
+  virtual void SetVisible(bool value);
 
   float opacity() const { return opacity_; }
   void SetOpacity(float value);
@@ -186,7 +186,7 @@ class ServerWindow : public viz::HostFrameSinkClient {
   const std::map<std::string, std::vector<uint8_t>>& properties() const {
     return properties_;
   }
-  void SetProperty(const std::string& name, const std::vector<uint8_t>* value);
+  virtual void SetProperty(const std::string& name, const std::vector<uint8_t>* value);
 
   std::string GetName() const;
 
