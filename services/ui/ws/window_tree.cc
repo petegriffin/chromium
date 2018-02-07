@@ -259,17 +259,6 @@ void WindowTree::ConfigureWindowManager(
   window_manager_state_ = std::make_unique<WindowManagerState>(this);
 }
 
-void WindowTree::ConfigureRootWindowTreeClient(
-    bool automatically_create_display_roots) {
-  DCHECK(window_server_->IsInExternalWindowMode());
-  automatically_create_display_roots_ = automatically_create_display_roots;
-  window_manager_internal_ = binding_->GetWindowManager();
-  window_manager_internal_->OnConnect();
-
-  external_window_tree_host_factory_.reset(
-      new ExternalWindowTreeHostFactory(window_server_, user_id_));
-}
-
 const ServerWindow* WindowTree::GetWindow(const WindowId& id) const {
   if (id_ == id.client_id) {
     auto iter = created_window_map_.find(id);
