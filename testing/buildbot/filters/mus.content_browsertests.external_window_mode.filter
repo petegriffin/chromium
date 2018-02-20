@@ -168,3 +168,4 @@
 -DumpAccessibilityTreeTest.AccessibilityFramesetPostEnable
 -SignalTest.SignalQueryUnboundTest
 -NonBlockingEventBrowserTest.TouchStart
+-TouchActionBrowserTest.DefaultAuto
