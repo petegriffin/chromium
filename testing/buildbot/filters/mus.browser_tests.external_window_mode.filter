@@ -205,3 +205,8 @@
 -TabCaptureApiTest.GrantForChromePages
 -TabCaptureApiTest.MaxOffscreenTabs
 -TabCaptureApiTest.TabIndicator
+-AppViewTest.KillGuestCommunicatingWithWrongAppView
+-AppViewTest.KillGuestWithInvalidInstanceID
+-MediaEngagementSessionRestoreBrowserTest.RestoredSession_NoPlayback_NoMEI
+-MediaEngagementSessionRestoreBrowserTest.RestoredSession_Playback_MEI
+-SubframeTaskBrowserTest.TaskManagerHungSubframe
