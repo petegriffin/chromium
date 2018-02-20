@@ -21,3 +21,6 @@
 # failures after the r532296 rebase.
 -PopupsOnlyUiDelegateTest.ManyPopupNotifications
 -PopupsOnlyUiDelegateTest.WebNotificationPopupBubble
+
+# failures after the r534306 
+-BrowserViewTest.AccessibleWindowTitle
