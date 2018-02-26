@@ -19,6 +19,7 @@
 #include "content/browser/gpu/gpu_data_manager_impl.h"
 #include "content/browser/gpu/gpu_process_host.h"
 #include "content/browser/gpu/shader_cache_factory.h"
+#include "content/browser/mus_util.h"
 #include "content/common/child_process_host_impl.h"
 #include "content/public/browser/browser_thread.h"
 #include "content/public/browser/content_browser_client.h"
@@ -28,7 +29,7 @@
 #include "gpu/command_buffer/service/gpu_switches.h"
 #include "services/resource_coordinator/public/mojom/memory_instrumentation/constants.mojom.h"
 #include "services/service_manager/runner/common/client_util.h"
-#include "ui/base/ui_base_features.h"
+#include "ui/base/ui_base_switches_util.h"
 
 namespace content {
 
@@ -273,7 +274,7 @@ BrowserGpuChannelHostFactory::~BrowserGpuChannelHostFactory() {
 void BrowserGpuChannelHostFactory::EstablishGpuChannel(
     gpu::GpuChannelEstablishedCallback callback) {
 #if defined(USE_AURA)
-  DCHECK(!base::FeatureList::IsEnabled(::features::kMash));
+  DCHECK(!switches::IsMusHostingViz());
 #endif
   DCHECK(BrowserThread::CurrentlyOn(BrowserThread::UI));
   if (gpu_channel_.get() && gpu_channel_->IsLost()) {

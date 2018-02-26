@@ -19,7 +19,6 @@
 #include "ui/aura/window_delegate.h"
 #include "ui/aura/window_observer.h"
 #include "ui/base/class_property.h"
-#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches_util.h"
 #include "ui/display/display.h"
 #include "ui/display/screen.h"
@@ -408,7 +407,7 @@ void WindowPortMus::AllocateLocalSurfaceId() {
 }
 
 const viz::LocalSurfaceId& WindowPortMus::GetLocalSurfaceId() {
-  if (base::FeatureList::IsEnabled(features::kMash))
+  if (switches::IsMusHostingViz())
     return local_surface_id_;
   if (!window_->IsEmbeddingClient() && !window_->IsRootWindow())
     return local_surface_id_;
@@ -561,7 +560,7 @@ WindowPortMus::CreateLayerTreeFrameSink() {
   DCHECK(!local_layer_tree_frame_sink_);
 
   std::unique_ptr<cc::LayerTreeFrameSink> frame_sink;
-  if (base::FeatureList::IsEnabled(features::kMash)) {
+  if (switches::IsMusHostingViz()) {
     auto client_layer_tree_frame_sink =
         RequestLayerTreeFrameSink(nullptr, aura::Env::GetInstance()
                                                ->context_factory()
@@ -596,7 +595,7 @@ WindowPortMus::CreateLayerTreeFrameSink() {
 }
 
 void WindowPortMus::OnWindowAddedToRootWindow() {
-  if (base::FeatureList::IsEnabled(features::kMash))
+  if (switches::IsMusHostingViz())
     return;
   if (local_layer_tree_frame_sink_) {
     DCHECK(!is_frame_sink_id_added_to_compositor_);
@@ -606,7 +605,7 @@ void WindowPortMus::OnWindowAddedToRootWindow() {
 }
 
 void WindowPortMus::OnWillRemoveWindowFromRootWindow() {
-  if (base::FeatureList::IsEnabled(features::kMash))
+  if (switches::IsMusHostingViz())
     return;
   if (is_frame_sink_id_added_to_compositor_) {
     window_->layer()->GetCompositor()->RemoveFrameSink(GetFrameSinkId());
@@ -639,7 +638,7 @@ void WindowPortMus::UpdatePrimarySurfaceId() {
 }
 
 void WindowPortMus::UpdateClientSurfaceEmbedder() {
-  if (!base::FeatureList::IsEnabled(features::kMash))
+  if (!switches::IsMusHostingViz())
     return;
   if (window_mus_type() != WindowMusType::TOP_LEVEL_IN_WM &&
       window_mus_type() != WindowMusType::EMBED_IN_OWNER &&
@@ -661,7 +660,7 @@ void WindowPortMus::UpdateClientSurfaceEmbedder() {
 void WindowPortMus::OnSurfaceChanged(const viz::SurfaceInfo& surface_info) {
   // TODO(fsamuel): Rename OnFirstSurfaceActivation() and set primary earlier
   // based on feedback from LayerTreeFrameSinkLocal.
-  DCHECK(!base::FeatureList::IsEnabled(features::kMash));
+  DCHECK(!switches::IsMusHostingViz());
   DCHECK_EQ(surface_info.id().frame_sink_id(), GetFrameSinkId());
   DCHECK_EQ(surface_info.id().local_surface_id(), local_surface_id_);
   window_->layer()->SetShowPrimarySurface(

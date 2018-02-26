@@ -22,7 +22,7 @@
 #include "services/service_manager/public/cpp/connector.h"
 #include "services/ui/public/interfaces/arc.mojom.h"
 #include "services/ui/public/interfaces/constants.mojom.h"
-#include "ui/base/ui_base_features.h"
+#include "ui/base/ui_base_switches_util.h"
 
 namespace arc {
 
@@ -49,9 +49,7 @@ class GpuArcVideoServiceHostFactory
 
 class VideoAcceleratorFactoryService : public mojom::VideoAcceleratorFactory {
  public:
-  VideoAcceleratorFactoryService() {
-    DCHECK(!base::FeatureList::IsEnabled(features::kMash));
-  }
+  VideoAcceleratorFactoryService() { DCHECK(!switches::IsMusHostingViz()); }
 
   ~VideoAcceleratorFactoryService() override = default;
 
@@ -81,7 +79,7 @@ class VideoAcceleratorFactoryServiceViz
     : public mojom::VideoAcceleratorFactory {
  public:
   VideoAcceleratorFactoryServiceViz() {
-    DCHECK(base::FeatureList::IsEnabled(features::kMash));
+    DCHECK(switches::IsMusHostingViz());
     DETACH_FROM_THREAD(thread_checker_);
     auto* connector =
         content::ServiceManagerConnection::GetForProcess()->GetConnector();
@@ -114,7 +112,7 @@ class VideoAcceleratorFactoryServiceViz
 
 std::unique_ptr<mojom::VideoAcceleratorFactory>
 CreateVideoAcceleratorFactory() {
-  if (base::FeatureList::IsEnabled(features::kMash))
+  if (switches::IsMusHostingViz())
     return std::make_unique<VideoAcceleratorFactoryServiceViz>();
   return std::make_unique<VideoAcceleratorFactoryService>();
 }

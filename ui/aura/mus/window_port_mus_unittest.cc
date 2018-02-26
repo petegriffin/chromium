@@ -10,7 +10,7 @@
 #include "ui/aura/mus/client_surface_embedder.h"
 #include "ui/aura/test/aura_test_base.h"
 #include "ui/aura/window.h"
-#include "ui/base/ui_base_features.h"
+#include "ui/base/ui_base_switches_util.h"
 
 namespace aura {
 
@@ -47,7 +47,7 @@ TEST_F(WindowPortMusTest, LayerTreeFrameSinkGetsCorrectLocalSurfaceId) {
   auto mus_frame_sink = GetFrameSinkFor(&window);
   ASSERT_TRUE(mus_frame_sink);
   auto frame_sink_local_surface_id =
-      base::FeatureList::IsEnabled(features::kMash)
+      switches::IsMusHostingViz()
           ? static_cast<viz::ClientLayerTreeFrameSink*>(mus_frame_sink.get())
                 ->local_surface_id()
           : static_cast<LayerTreeFrameSinkLocal*>(mus_frame_sink.get())
@@ -58,7 +58,7 @@ TEST_F(WindowPortMusTest, LayerTreeFrameSinkGetsCorrectLocalSurfaceId) {
 
 TEST_F(WindowPortMusTest, ClientSurfaceEmbedderUpdatesLayer) {
   // If mus is not hosting viz, we don't have ClientSurfaceEmbedder.
-  if (!base::FeatureList::IsEnabled(features::kMash))
+  if (!switches::IsMusHostingViz())
     return;
 
   Window window(nullptr);

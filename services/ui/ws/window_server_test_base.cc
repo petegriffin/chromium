@@ -16,7 +16,6 @@
 #include "ui/aura/env.h"
 #include "ui/aura/mus/window_tree_client.h"
 #include "ui/aura/mus/window_tree_host_mus.h"
-#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches.h"
 #include "ui/display/display.h"
 #include "ui/display/display_list.h"
@@ -94,7 +93,9 @@ WindowServerTestBase::ReleaseMostRecentClient() {
 }
 
 void WindowServerTestBase::SetUp() {
-  feature_list_.InitAndEnableFeature(features::kMash);
+  base::CommandLine::ForCurrentProcess()->AppendSwitch(switches::kMus);
+  base::CommandLine::ForCurrentProcess()->AppendSwitch(
+      switches::kMusHostingViz);
   WindowServerServiceTestBase::SetUp();
 
   env_ = aura::Env::CreateInstance(aura::Env::Mode::MUS);

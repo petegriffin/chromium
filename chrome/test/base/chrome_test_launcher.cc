@@ -63,6 +63,12 @@ ChromeTestSuiteRunner::ChromeTestSuiteRunner() {}
 ChromeTestSuiteRunner::~ChromeTestSuiteRunner() {}
 
 int ChromeTestSuiteRunner::RunTestSuite(int argc, char** argv) {
+#if defined(USE_AURA)
+  base::CommandLine* command_line = base::CommandLine::ForCurrentProcess();
+  if (command_line->HasSwitch(service_manager::switches::kServicePipeToken))
+    content::GetContentMainParams()->env_mode = aura::Env::Mode::MUS;
+#endif  // defined(USE_AURA)
+
   return ChromeTestSuite(argc, argv).Run();
 }
 

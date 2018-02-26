@@ -248,7 +248,6 @@
 #include "third_party/WebKit/public/platform/modules/webshare/webshare.mojom.h"
 #include "ui/base/l10n/l10n_util.h"
 #include "ui/base/resource/resource_bundle.h"
-#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_features.h"
 #include "ui/resources/grit/ui_resources.h"
 #include "url/gurl.h"
@@ -3248,7 +3247,7 @@ void ChromeContentBrowserClient::RegisterOutOfProcessServices(
       l10n_util::GetStringUTF16(IDS_UTILITY_PROCESS_UNZIP_NAME);
 
 #if defined(OS_CHROMEOS)
-  if (base::FeatureList::IsEnabled(features::kMash))
+  if (base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kMash))
     mash_service_registry::RegisterOutOfProcessServices(services);
 #endif
 }

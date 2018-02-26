@@ -18,7 +18,6 @@
 #include "gpu/config/gpu_switches.h"
 #include "third_party/skia/include/core/SkBitmap.h"
 #include "third_party/skia/include/core/SkColor.h"
-#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches.h"
 #include "ui/compositor/compositor_switches.h"
 #include "ui/gl/gl_switches.h"
@@ -34,7 +33,10 @@ class OOPBrowserTest : public ContentBrowserTest {
     command_line->AppendSwitch(switches::kEnablePixelOutputInTests);
     command_line->AppendSwitch(switches::kEnableOOPRasterization);
 
-    const bool use_gpu_in_tests = !features::IsMusEnabled();
+    bool use_gpu_in_tests = true;
+#if defined(USE_AURA)
+    use_gpu_in_tests = !command_line->HasSwitch(switches::kMus);
+#endif
     if (use_gpu_in_tests)
       command_line->AppendSwitch(switches::kUseGpuInTests);
   }

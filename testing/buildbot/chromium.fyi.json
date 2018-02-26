@@ -5929,7 +5929,7 @@
     "gtest_tests": [
       {
         "args": [
-          "--enable-features=Mash",
+          "--mash",
           "--test-launcher-filter-file=../../testing/buildbot/filters/ash_unittests_mash.filter"
         ],
         "name": "mash_ash_unittests",
@@ -5941,7 +5941,7 @@
       },
       {
         "args": [
-          "--enable-features=Mus"
+          "--mus"
         ],
         "name": "mus_ash_unittests",
         "swarming": {
@@ -5951,7 +5951,21 @@
       },
       {
         "args": [
-          "--enable-features=Mus",
+          "--mash",
+          "--override-use-software-gl-for-tests",
+          "--test-launcher-filter-file=../../testing/buildbot/filters/mojo.fyi.mash.browser_tests.filter"
+        ],
+        "name": "mash_browser_tests",
+        "swarming": {
+          "can_use_on_swarming_builders": true,
+          "hard_timeout": 1800,
+          "shards": 10
+        },
+        "test": "browser_tests"
+      },
+      {
+        "args": [
+          "--mus",
           "--ozone-platform=headless",
           "--override-use-software-gl-for-tests"
         ],
@@ -5987,7 +6001,7 @@
       },
       {
         "args": [
-          "--enable-features=Mus"
+          "--mus"
         ],
         "name": "mus_content_browsertests",
         "swarming": {
@@ -6021,7 +6035,7 @@
       },
       {
         "args": [
-          "--enable-features=Mus"
+          "--mus"
         ],
         "name": "mus_content_unittests",
         "swarming": {
@@ -6048,7 +6062,7 @@
       },
       {
         "args": [
-          "--enable-features=Mus"
+          "--mus"
         ],
         "name": "mus_unit_tests",
         "swarming": {
