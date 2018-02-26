@@ -19,7 +19,6 @@
           "content::mojom::FontCacheWin"
         ],
         "gpu": [
-          "discardable_memory::mojom::DiscardableSharedMemoryManager",
           "media::mojom::AndroidOverlayProvider"
         ],
         "plugin": [

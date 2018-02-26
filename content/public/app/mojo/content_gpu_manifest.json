@@ -29,8 +29,7 @@
           "gpu"
         ],
         "device": [ "device:power_monitor" ],
-        "metrics": [ "url_keyed_metrics" ],
-        "ui": [ "discardable_memory" ]
+        "metrics": [ "url_keyed_metrics" ]
       }
     }
   }
