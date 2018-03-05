@@ -1,4 +1,4 @@
-# These tests fail when running browser_tests with mash
+# These tests fail when running browser_tests --mash
 # http://crbug.com/678687
 
 # Unknown failure.
@@ -202,9 +202,6 @@
 # ash::Shell access in test.
 -ShutdownPolicyInSessionTest.*
 
-# content::WaitForChildFrameSurfaceReady hangs.
--SitePerProcessDevToolsSanityTest.InputDispatchEventsToOOPIF
-
 # Function under test uses ash::Shell for window list.
 -SortWindowsByZIndexBrowserTest.*
 
@@ -248,13 +245,16 @@
 -VirtualKeyboardStateTest.*
 -VirtualKeyboardWebContentTest.*
 
-# Also fails with mus. http://crbug.com/755318.
+# Also fails in --mus. http://crbug.com/755318.
 -WebViewScrollBubbling/WebViewGuestScrollTouchTest.*
 
-# Also fails with mus. http://crbug.com/755328
+# Also fails in --mus. http://crbug.com/755328
 -WebViewTests/WebViewFocusTest.*
 -WebViewTests/WebViewSizeTest.*
 -WebViewTests/WebViewTest.*
+
+# crbug.com/792641 - Disable tests on mash during Wallpaper re-factoring
+-WallPaperPrivateApiTest.*
 
 # Sending invalid FrameSinkIds crbug.com/796999
 -WebviewLoginTest.AllowNewUser
@@ -262,18 +262,9 @@
 -PowerPolicyLoginScreenBrowserTest.SetDevicePolicy
 -EnterpriseEnrollmentTest.TestActiveDirectoryEnrollment_Success
 
-# Needs EventGenerator to work across window tree hosts. crbug.com/814675
--RoundedOmniboxPopupContentsViewTest.ClickOmnibox*
+# Access aura window shadow layer. http://crbug.com/811859
+-OmniboxPopupContentsViewTest.PopupAlignment/Rounded
+-RoundedOmniboxPopupContentsViewTest.*
 
 # HostedAppMenu needs porting to BrowserNonClientFrameViewMus crbug.com/813666
 -HostedAppPWAOnlyTest.AppInfoOpensPageInfo*
-
-# DCHECK in DelegatedFrameHost
--SafeBrowsingTriggeredPopupBlockerBrowserTest.NoFeature_NoMessages
-
-# https://crbug.com/815379
--WindowOpenApiTest.RemoveLockedFullscreenFromWindow
--WindowOpenApiTest.RemoveLockedFullscreenFromWindowWithoutPermission
-
-# Flaky segfaults: https://crbug.com/818147
--ExtensionApiTest.BookmarkManager

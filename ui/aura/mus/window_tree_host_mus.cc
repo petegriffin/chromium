@@ -15,7 +15,6 @@
 #include "ui/aura/window_event_dispatcher.h"
 #include "ui/aura/window_tree_host_observer.h"
 #include "ui/base/class_property.h"
-#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches_util.h"
 #include "ui/display/display.h"
 #include "ui/display/screen.h"
@@ -61,7 +60,7 @@ WindowTreeHostMus::WindowTreeHostMus(WindowTreeHostMusInitParams init_params)
   // If window-server is hosting viz, then use the FrameSinkId from the server.
   // In other cases, let a valid FrameSinkId be selected by
   // context_factory_private().
-  CreateCompositor(base::FeatureList::IsEnabled(features::kMash)
+  CreateCompositor(switches::IsMusHostingViz()
                        ? window_mus->GenerateFrameSinkIdFromServerId()
                        : viz::FrameSinkId());
   if (!init_params.uses_real_accelerated_widget) {

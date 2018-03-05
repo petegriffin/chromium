@@ -80,6 +80,7 @@
 #include "content/browser/media/media_internals.h"
 #include "content/browser/memory/memory_coordinator_impl.h"
 #include "content/browser/memory/swap_metrics_delegate_uma.h"
+#include "content/browser/mus_util.h"
 #include "content/browser/net/browser_online_state_observer.h"
 #include "content/browser/renderer_host/media/media_stream_manager.h"
 #include "content/browser/renderer_host/render_process_host_impl.h"
@@ -132,7 +133,8 @@
 #include "skia/ext/skia_memory_dump_provider.h"
 #include "sql/sql_memory_dump_provider.h"
 #include "ui/base/clipboard/clipboard.h"
-#include "ui/base/ui_base_features.h"
+#include "ui/base/ui_base_switches.h"
+#include "ui/base/ui_base_switches_util.h"
 #include "ui/display/display_switches.h"
 #include "ui/gfx/switches.h"
 
@@ -796,7 +798,7 @@ void BrowserMainLoop::PostMainMessageLoopStart() {
         BrowserThread::GetTaskRunnerForThread(BrowserThread::UI));
   }
 
-  if (!base::FeatureList::IsEnabled(::features::kMash)) {
+  if (parameters_.create_discardable_memory) {
     discardable_shared_memory_manager_ =
         std::make_unique<discardable_memory::DiscardableSharedMemoryManager>();
     // TODO(boliu): kSingleProcess check is a temporary workaround for
@@ -1310,7 +1312,7 @@ void BrowserMainLoop::GetCompositingModeReporter(
   // CompositingModeReporter.
   return;
 #else
-  if (features::IsMusEnabled()) {
+  if (IsUsingMus()) {
     // Mus == ChromeOS, which doesn't support software compositing, so no need
     // to report compositing mode.
     return;
@@ -1348,7 +1350,7 @@ int BrowserMainLoop::BrowserThreadsStarted() {
   InitializeMojo();
 
 #if BUILDFLAG(ENABLE_MUS)
-  if (features::IsMusEnabled()) {
+  if (IsUsingMus()) {
     base::CommandLine::ForCurrentProcess()->AppendSwitch(
         switches::kEnableSurfaceSynchronization);
   }
@@ -1372,7 +1374,7 @@ int BrowserMainLoop::BrowserThreadsStarted() {
       BrowserThread::GetTaskRunnerForThread(BrowserThread::IO));
 
   // If mus is not hosting viz, then the browser must.
-  bool browser_is_viz_host = !base::FeatureList::IsEnabled(::features::kMash);
+  bool browser_is_viz_host = !switches::IsMusHostingViz();
 
   bool always_uses_gpu = true;
   bool established_gpu_channel = false;
@@ -1614,12 +1616,11 @@ bool BrowserMainLoop::InitializeToolkit() {
 
   // Env creates the compositor. Aura widgets need the compositor to be created
   // before they can be initialized by the browser.
-  env_ = aura::Env::CreateInstance(
-      features::IsMusEnabled() ? aura::Env::Mode::MUS : aura::Env::Mode::LOCAL);
+  env_ = aura::Env::CreateInstance(parameters_.env_mode);
 #endif  // defined(USE_AURA)
 
 #if BUILDFLAG(ENABLE_MUS)
-  if (features::IsMusEnabled())
+  if (parsed_command_line_.HasSwitch(switches::kMus))
     image_cursors_set_ = std::make_unique<ui::ImageCursorsSet>();
 #endif
 

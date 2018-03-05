@@ -9,7 +9,6 @@
 #include "base/command_line.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "base/trace_event/trace_event.h"
-#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches.h"
 #include "ui/ozone/common/gpu/ozone_gpu_message_params.h"
 #include "ui/ozone/common/gpu/ozone_gpu_messages.h"
@@ -95,7 +94,7 @@ DrmGpuPlatformSupportHost::DrmGpuPlatformSupportHost(DrmCursor* cursor)
   if (ui_runner_) {
     weak_ptr_ = weak_ptr_factory_.GetWeakPtr();
   } else {
-    DCHECK(!features::IsMusEnabled());
+    DCHECK(!base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kMus));
   }
 }
 

@@ -1531,10 +1531,10 @@ const FeatureEntry kFeatureEntries[] = {
      FEATURE_VALUE_TYPE(features::kMultiDeviceApi)},
     {"mus", flag_descriptions::kUseMusName,
      flag_descriptions::kUseMusDescription, kOsCrOS,
-     FEATURE_VALUE_TYPE(features::kMus)},
+     SINGLE_VALUE_TYPE(switches::kMus)},
     {"mash", flag_descriptions::kUseMashName,
      flag_descriptions::kUseMashDescription, kOsCrOS,
-     FEATURE_VALUE_TYPE(features::kMash)},
+     SINGLE_VALUE_TYPE(switches::kMash)},
     {"show-taps", flag_descriptions::kShowTapsName,
      flag_descriptions::kShowTapsDescription, kOsCrOS,
      SINGLE_VALUE_TYPE(ash::switches::kShowTaps)},
@@ -3809,7 +3809,7 @@ class FlagsStateSingleton {
 bool SkipConditionalFeatureEntry(const FeatureEntry& entry) {
   version_info::Channel channel = chrome::GetChannel();
 #if defined(OS_CHROMEOS)
-  // Don't expose mash on stable channel.
+  // Don't expose --mash on stable channel.
   if (!strcmp("mash", entry.internal_name) &&
       channel == version_info::Channel::STABLE) {
     return true;

@@ -20,7 +20,7 @@
 #include "content/public/common/service_manager_connection.h"
 #include "mojo/public/cpp/bindings/interface_request.h"
 #include "services/service_manager/public/cpp/binder_registry.h"
-#include "ui/base/ui_base_features.h"
+#include "ui/base/ui_base_switches.h"
 
 #if defined(OS_WIN)
 #include "content/browser/renderer_host/dwrite_font_proxy_message_filter_win.h"
@@ -30,6 +30,15 @@
 namespace content {
 
 namespace {
+
+bool IsRunningWithMus() {
+#if BUILDFLAG(ENABLE_MUS)
+  const base::CommandLine* cmdline = base::CommandLine::ForCurrentProcess();
+  return cmdline->HasSwitch(switches::kMus);
+#else
+  return false;
+#endif
+}
 
 class ConnectionFilterImpl : public ConnectionFilter {
  public:
@@ -41,7 +50,7 @@ class ConnectionFilterImpl : public ConnectionFilter {
         base::CreateSequencedTaskRunnerWithTraits(
             {base::TaskPriority::USER_BLOCKING, base::MayBlock()}));
 #endif
-    if (!features::IsMusEnabled()) {
+    if (!IsRunningWithMus()) {
       // For mus, the mojom::discardable_memory::DiscardableSharedMemoryManager
       // is exposed from ui::Service. So we don't need bind the interface here.
       auto* browser_main_loop = BrowserMainLoop::GetInstance();

@@ -6,7 +6,6 @@
 
 #include "base/command_line.h"
 #include "base/memory/ptr_util.h"
-#include "base/test/scoped_feature_list.h"
 #include "ui/aura/client/window_parenting_client.h"
 #include "ui/aura/mus/property_utils.h"
 #include "ui/aura/mus/window_tree_client.h"
@@ -17,7 +16,6 @@
 #include "ui/base/ime/input_method_initializer.h"
 #include "ui/base/material_design/material_design_controller.h"
 #include "ui/base/test/material_design_controller_test_api.h"
-#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches.h"
 #include "ui/base/ui_base_switches_util.h"
 #include "ui/compositor/test/context_factories_for_test.h"
@@ -85,7 +83,7 @@ void AuraTestBase::SetUp() {
   // The ContextFactory must exist before any Compositors are created.
   ui::ContextFactory* context_factory = nullptr;
   ui::ContextFactoryPrivate* context_factory_private = nullptr;
-  if (use_mus_ && base::FeatureList::IsEnabled(features::kMash)) {
+  if (use_mus_ && switches::IsMusHostingViz()) {
     mus_context_factory_ = std::make_unique<AuraTestContextFactory>();
     context_factory = mus_context_factory_.get();
   } else {
@@ -152,9 +150,10 @@ void AuraTestBase::DeleteWindowTreeClient() {
 void AuraTestBase::ConfigureBackend(BackendType type) {
   if (type != BackendType::CLASSIC)
     EnableMusWithTestWindowTree();
-  if (type == BackendType::MASH) {
-    feature_list_ = std::make_unique<base::test::ScopedFeatureList>();
-    feature_list_->InitAndEnableFeature(features::kMash);
+  if (type == BackendType::MUS_HOSTING_VIZ) {
+    base::CommandLine::ForCurrentProcess()->AppendSwitch(switches::kMus);
+    base::CommandLine::ForCurrentProcess()->AppendSwitch(
+        switches::kMusHostingViz);
   }
 }
 

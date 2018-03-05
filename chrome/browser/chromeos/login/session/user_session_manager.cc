@@ -304,6 +304,11 @@ bool NeedRestartToApplyPerSessionFlags(
     return false;
   }
 
+  // TODO(mfomitchev): Browser restart doesn't currently work in Mus+ash.
+  // So if we are running Mustash and we need to restart - just crash right
+  // here. crbug.com/690140
+  CHECK(!user_flags.HasSwitch(::switches::kMash));
+
   return true;
 }
 

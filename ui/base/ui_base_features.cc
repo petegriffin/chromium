@@ -56,21 +56,4 @@ const base::Feature kPrecisionTouchpad{"PrecisionTouchpad",
                                        base::FEATURE_DISABLED_BY_DEFAULT};
 #endif  // defined(OS_WIN)
 
-// Used to have ash run in its own process. This implicitly turns on the
-// WindowService. That is, if this is set IsMusEnabled() returns true.
-const base::Feature kMash = {"Mash", base::FEATURE_DISABLED_BY_DEFAULT};
-
-// Used to control the mus service (aka the UI service). This makes mus run in
-// process.
-const base::Feature kMus = {"Mus", base::FEATURE_DISABLED_BY_DEFAULT};
-
-bool IsMusEnabled() {
-#if defined(USE_AURA)
-  return base::FeatureList::IsEnabled(features::kMus) ||
-         base::FeatureList::IsEnabled(features::kMash);
-#else
-  return false;
-#endif
-}
-
 }  // namespace features
