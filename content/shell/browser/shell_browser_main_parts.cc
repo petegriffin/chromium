@@ -30,6 +30,7 @@
 #include "net/base/filename_util.h"
 #include "net/base/net_module.h"
 #include "net/grit/net_resources.h"
+#include "ui/aura/env.h"
 #include "ui/base/material_design/material_design_controller.h"
 #include "ui/base/resource/resource_bundle.h"
 #include "url/gurl.h"
@@ -265,7 +266,8 @@ void ShellBrowserMainParts::ServiceManagerConnectionStarted(
     ServiceManagerConnection* connection) {
 #if defined(OS_LINUX) && defined(USE_OZONE) && !defined(OS_CHROMEOS)
 #if defined(USE_AURA)
-  if (aura::Env::GetInstance()->mode() == aura::Env::Mode::LOCAL)
+  if (aura::Env::GetInstance()->mode() == aura::Env::Mode::LOCAL ||
+      !base::FeatureList::IsEnabled(features::kMash))
     return; 
 
   input_device_client_ = std::make_unique<ui::InputDeviceClient>();
