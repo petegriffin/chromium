@@ -42,7 +42,7 @@ Here is the summary of commands to build and run Chrome for Wayland:
 ```
 gn args out/Ozone --args="use_ozone=true enable_mus=true use_xkbcommon=true"
 ninja -C out/Ozone chrome
-./out/Ozone/chrome --mus --ozone-platform=wayland
+./out/Ozone/chrome --enable-features=Mash --ozone-platform=wayland
 
 Note that GN defaults to debug builds, which naturally take longer to finish and produce slower binaries at runtime. The 'is_debug=false' GN arguments disables it.
 
@@ -65,7 +65,7 @@ for now. One can run the MUS Demo as follows:
 
 ```
 ninja -C out/Ozone mus_demo mash:all
-./out/Ozone/mash --service=mus_demo --external-window-count=2
+./out/Ozone/mash --service=mus_demo --enable-features=Mash --external-window-count=2
 ```
 
 One can also run automated unit tests. For example to check the MUS demo and
