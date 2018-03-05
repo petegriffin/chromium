@@ -29,7 +29,7 @@
 namespace ash {
 namespace {
 
-const char kTooltipText[] = "Running with flag --mash";
+const char kTooltipText[] = "Running with feature mash";
 
 }  // namespace
 
@@ -37,7 +37,6 @@ FlagWarningTray::FlagWarningTray(Shelf* shelf) : shelf_(shelf) {
   DCHECK(shelf_);
   SetLayoutManager(std::make_unique<views::FillLayout>());
 
-  // The flag --mash is a chrome-level switch, so check the config instead.
   const bool is_mash = Shell::GetAshConfig() == Config::MASH;
   if (is_mash) {
     container_ = new TrayContainer(shelf);

@@ -32,7 +32,6 @@
 #include "content/renderer/child_frame_compositing_helper.h"
 #include "content/renderer/cursor_utils.h"
 #include "content/renderer/drop_data_builder.h"
-#include "content/renderer/mash_util.h"
 #include "content/renderer/render_thread_impl.h"
 #include "content/renderer/sad_plugin.h"
 #include "third_party/WebKit/public/platform/WebCoalescedInputEvent.h"
@@ -46,7 +45,7 @@
 #include "third_party/WebKit/public/web/WebLocalFrame.h"
 #include "third_party/WebKit/public/web/WebPluginContainer.h"
 #include "third_party/WebKit/public/web/WebView.h"
-#include "ui/base/ui_base_switches_util.h"
+#include "ui/base/ui_base_features.h"
 #include "ui/events/keycodes/keyboard_codes.h"
 
 #if defined(USE_AURA)
@@ -142,7 +141,7 @@ bool BrowserPlugin::OnMessageReceived(const IPC::Message& message) {
 void BrowserPlugin::OnSetChildFrameSurface(
     int browser_plugin_instance_id,
     const viz::SurfaceInfo& surface_info) {
-  if (!attached() || switches::IsMusHostingViz())
+  if (!attached() || base::FeatureList::IsEnabled(features::kMash))
     return;
 
   if (!enable_surface_synchronization_) {
@@ -287,7 +286,7 @@ void BrowserPlugin::WasResized() {
     sent_resize_params_ = pending_resize_params_;
 
 #if defined(USE_AURA)
-  if (IsRunningWithMus() && mus_embedded_frame_) {
+  if (features::IsMusEnabled() && mus_embedded_frame_) {
     mus_embedded_frame_->SetWindowBounds(GetLocalSurfaceId(),
                                          FrameRectInPixels());
   }
@@ -363,7 +362,7 @@ void BrowserPlugin::OnSetMouseLock(int browser_plugin_instance_id,
 void BrowserPlugin::OnSetMusEmbedToken(
     int instance_id,
     const base::UnguessableToken& embed_token) {
-  DCHECK(switches::IsMusHostingViz());
+  DCHECK(base::FeatureList::IsEnabled(features::kMash));
   if (!attached_) {
     pending_embed_token_ = embed_token;
   } else {
@@ -785,7 +784,7 @@ void BrowserPlugin::OnMusEmbeddedFrameSurfaceChanged(
 void BrowserPlugin::OnMusEmbeddedFrameSinkIdAllocated(
     const viz::FrameSinkId& frame_sink_id) {
   // RendererWindowTreeClient should only call this when mus is hosting viz.
-  DCHECK(switches::IsMusHostingViz());
+  DCHECK(base::FeatureList::IsEnabled(features::kMash));
   OnGuestReady(browser_plugin_instance_id_, frame_sink_id);
 }
 #endif

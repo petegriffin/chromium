@@ -59,6 +59,7 @@
 #include "ui/aura/window_port_for_shutdown.h"
 #include "ui/aura/window_tracker.h"
 #include "ui/base/layout.h"
+#include "ui/base/ui_base_features.h"
 #include "ui/base/ui_base_switches_util.h"
 #include "ui/base/ui_base_types.h"
 #include "ui/display/screen.h"
@@ -434,7 +435,7 @@ WindowTreeClient::WindowTreeClient(
       io_task_runner = io_thread_->task_runner();
     }
 
-    if (switches::IsMusHostingViz()) {
+    if (base::FeatureList::IsEnabled(features::kMash)) {
       gpu_ =
           ui::Gpu::Create(connector, ui::mojom::kServiceName, io_task_runner);
       compositor_context_factory_ =
@@ -659,7 +660,8 @@ std::unique_ptr<WindowTreeHostMus> WindowTreeClient::CreateWindowTreeHost(
   if (window_manager_delegate_ &&
       (window_mus_type == WindowMusType::EMBED ||
        window_mus_type == WindowMusType::DISPLAY_AUTOMATICALLY_CREATED)) {
-    init_params.uses_real_accelerated_widget = !::switches::IsMusHostingViz();
+    init_params.uses_real_accelerated_widget =
+        !::base::FeatureList::IsEnabled(features::kMash);
   }
   std::unique_ptr<WindowTreeHostMus> window_tree_host =
       std::make_unique<WindowTreeHostMus>(std::move(init_params));
@@ -966,8 +968,9 @@ void WindowTreeClient::OnWindowMusCreated(WindowMus* window) {
       window_manager_client_->SetDisplayRoot(
           display, display_init_params->viewport_metrics.Clone(),
           display_init_params->is_primary_display, window->server_id(),
-          switches::IsMusHostingViz() ? display_init_params->mirrors
-                                      : std::vector<display::Display>(),
+          base::FeatureList::IsEnabled(features::kMash)
+              ? display_init_params->mirrors
+              : std::vector<display::Display>(),
           base::Bind(&OnAckMustSucceed, FROM_HERE));
     }
   }
@@ -1334,7 +1337,7 @@ void WindowTreeClient::OnCaptureChanged(ui::Id new_capture_window_id,
 void WindowTreeClient::OnFrameSinkIdAllocated(
     ui::Id window_id,
     const viz::FrameSinkId& frame_sink_id) {
-  if (!switches::IsMusHostingViz())
+  if (!base::FeatureList::IsEnabled(features::kMash))
     return;
   WindowMus* window = GetWindowByServerId(window_id);
   if (!window)
