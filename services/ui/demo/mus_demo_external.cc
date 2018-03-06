@@ -15,7 +15,6 @@
 #include "ui/aura/mus/window_tree_client.h"
 #include "ui/aura/mus/window_tree_host_mus.h"
 #include "ui/aura/mus/window_tree_host_mus_init_params.h"
-#include "ui/base/ui_base_switches.h"
 #include "ui/display/display.h"
 
 namespace ui {
@@ -58,10 +57,6 @@ MusDemoExternal::~MusDemoExternal() {}
 
 std::unique_ptr<aura::WindowTreeClient>
 MusDemoExternal::CreateWindowTreeClient() {
-  base::CommandLine* command_line =
-      base::CommandLine::ForCurrentProcess();
-  command_line->AppendSwitch(switches::kMusHostingViz);
-
   return aura::WindowTreeClient::CreateForExternalWindowTreeFactory(
       context()->connector(), this);
 }

@@ -51,18 +51,6 @@ int main(int argc, const char** argv) {
   content::ContentMainParams params(&delegate);
   params.argc = argc;
   params.argv = argv;
-
-#if BUILDFLAG(ENABLE_MUS) && defined(OS_LINUX) && !defined(OS_CHROMEOS)
-  base::CommandLine::Init(params.argc, params.argv);
-  if (base::CommandLine::ForCurrentProcess()->HasSwitch(switches::kMus)) {
-    // TODO(msisov, tonikitoo): remove this once viz is decoupled from
-    // Linux/Mus.
-    base::CommandLine::ForCurrentProcess()->AppendSwitch(
-        switches::kMusHostingViz);
-    params.env_mode = aura::Env::Mode::MUS;   
-  }
-#endif
-
   return content::ContentMain(params);
 #endif  // OS_MACOSX
 }
